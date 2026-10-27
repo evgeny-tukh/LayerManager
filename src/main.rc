@@ -1,0 +1,24 @@
+#include <windows.h>
+#include "resource.h"
+
+ID_MAINMENU MENU
+{
+    POPUP "&File"
+    {
+        MENUITEM "&Open...", ID_OPEN
+        MENUITEM "&Save...", ID_SAVE
+        MENUITEM "&Save as...", ID_SAVEAS
+        MENUITEM SEPARATOR
+        MENUITEM "&Generate...", ID_GENERATE
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit\tAlt-F4", ID_EXIT
+    }
+
+    POPUP "&Edit"
+    {
+        MENUITEM "&Add layer...", ID_ADD
+        MENUITEM "&Remove layer", ID_REMOVE
+        MENUITEM "&Move layer &up", ID_MOVE_UP
+        MENUITEM "&Move layer &down", ID_MOVE_DOWN
+    }
+}
