@@ -5,7 +5,10 @@
 			"type": "shell",
 			"label": "build",
 			"command": "${workspaceFolder}/build.cmd",
-			"args": [],
+			"args": [
+				"--open-csv-dir",
+				"E:\\work\\opencv"
+			],
 			"group": "build",
 			"problemMatcher": [],
 			"detail": "build task"

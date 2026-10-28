@@ -3,15 +3,18 @@
 #include <Windows.h>
 
 #include "resource.h"
+#include "layers.hpp"
 
 namespace {
 const char *mainWndName = "Layer Manager v1";
 const char *plsConfirmText = "Please confirm";
 const char *exitAppText = "Exit app?";
-const char *layerFilters = "TIFF files (*.tiff)\0*.tiff\0All files\0*.*\0";
+const char *layerFilters = "TIFF files (*.tiff;*.tif)\0*.tiff;*.tif\0All files\0*.*\0";
 const char *layerAddStr = "Add Layer";
 
 const int layerListWidth = 300;
+
+Layers layers;
 
 HINSTANCE getInstanceHandle(HWND wnd) {
     return reinterpret_cast<HINSTANCE>(GetWindowLongPtr(wnd, GWLP_HINSTANCE));
@@ -26,15 +29,15 @@ bool confirmExit(HWND wnd) {
 }
 
 void getLayerName(HWND wnd, int index, char *buf) {
-    SendDlgItemMessageA(wnd, IDC_LAYERS, LB_GETTEXT, index, reinterpret_cast<LPARAM>(buf));
+    SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETTEXT, index, reinterpret_cast<LPARAM>(buf));
 }
 
 void removeLayerItem(HWND wnd, int index) {
-    SendDlgItemMessageA(wnd, IDC_LAYERS, LB_DELETESTRING, index, 0);
+    SendDlgItemMessageA(wnd, ID_LAYERS, LB_DELETESTRING, index, 0);
 }
 
 void selectLayerItem(HWND wnd, int index) {
-    SendDlgItemMessageA(wnd, IDC_LAYERS, LB_SETCURSEL, index, 0);
+    SendDlgItemMessageA(wnd, ID_LAYERS, LB_SETCURSEL, index, 0);
 }
 
 }
@@ -44,16 +47,25 @@ namespace MainWnd {
 const char *clsName = "LMMainWnd";
 
 int getSelectedLayer(HWND wnd) {
-    return static_cast<int>(SendDlgItemMessageA(wnd, IDC_LAYERS, LB_GETCURSEL, 0, 0));
+    return static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETCURSEL, 0, 0));
 }
 
 int getNumOfLayers(HWND wnd) {
-    return static_cast<int>(SendDlgItemMessageA(wnd, IDC_LAYERS, LB_GETCOUNT, 0, 0));
+    return static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETCOUNT, 0, 0));
+}
+
+void paint(HWND wnd) {
+    PAINTSTRUCT ps;
+    HDC paintDC = BeginPaint(wnd, &ps);
+    int selection = getSelectedLayer(wnd);
+    if (selection >= 0)
+        layers.drawAtFast(wnd, selection);
+    EndPaint(wnd, &ps);
 }
 
 void onResize(HWND wnd, unsigned width, unsigned height) {
-    MoveWindow(GetDlgItem(wnd, IDC_LAYERS), 0, 0, layerListWidth, height, true);
-    MoveWindow(GetDlgItem(wnd, IDC_PREVIEW), layerListWidth, 0, width - layerListWidth, height, true);
+    MoveWindow(GetDlgItem(wnd, ID_LAYERS), 0, 0, layerListWidth, height, true);
+    MoveWindow(GetDlgItem(wnd, ID_PREVIEW), layerListWidth, 0, width - layerListWidth, height, true);
 }
 
 void initWindow(HWND wnd) {
@@ -65,13 +77,13 @@ void initWindow(HWND wnd) {
     CreateWindowA(
         "LISTBOX",
         "",
-        WS_VISIBLE|WS_CHILD|WS_BORDER|LBS_NOINTEGRALHEIGHT,
+        WS_VISIBLE|WS_CHILD|WS_BORDER|LBS_NOINTEGRALHEIGHT|LBS_STANDARD|LBS_NOTIFY,
         0,
         0,
         layerListWidth,
         client.bottom,
         wnd,
-        reinterpret_cast<HMENU>(IDC_LAYERS),
+        reinterpret_cast<HMENU>(ID_LAYERS),
         instance,
         nullptr
     );
@@ -79,13 +91,13 @@ void initWindow(HWND wnd) {
     CreateWindowA(
         "STATIC",
         "",
-        WS_VISIBLE|WS_CHILD|WS_BORDER|SS_BITMAP,
+        WS_VISIBLE|WS_CHILD|WS_BORDER|SS_BITMAP|WM_HSCROLL|WM_VSCROLL,
         layerListWidth,
         0,
         client.right - layerListWidth,
         client.bottom,
         wnd,
-        reinterpret_cast<HMENU>(IDC_PREVIEW),
+        reinterpret_cast<HMENU>(ID_PREVIEW),
         instance,
         nullptr
     );
@@ -119,8 +131,10 @@ void addLayer(HWND wnd) {
     ofn.nMaxFile = sizeof(buf);
 
     if (GetOpenFileNameA(&ofn)) {
-        int item = static_cast<int>(SendDlgItemMessageA(wnd, IDC_LAYERS, LB_ADDSTRING, 0, reinterpret_cast<WPARAM>(buf)));
+        int item = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_ADDSTRING, 0, reinterpret_cast<WPARAM>(buf)));
         selectLayerItem(wnd, item);
+        layers.addLayer(buf);
+        layers.drawAtFast(GetDlgItem(wnd, ID_PREVIEW), item);
     }
 }
 
@@ -159,12 +173,12 @@ void moveLayer(HWND wnd, int direction) {
 
     getLayerName(wnd, selection, layerName);
     removeLayerItem(wnd, selection);
-    SendDlgItemMessageA(wnd, IDC_LAYERS, LB_INSERTSTRING, newIndex, reinterpret_cast<LPARAM>(layerName));
+    SendDlgItemMessageA(wnd, ID_LAYERS, LB_INSERTSTRING, newIndex, reinterpret_cast<LPARAM>(layerName));
     selectLayerItem(wnd, newIndex);
 }
 
 void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
-    switch (wp) {
+    switch (LOWORD(wp)) {
         case ID_EXIT:
             if (confirmExit(wnd))
                 DestroyWindow(wnd);
@@ -185,6 +199,16 @@ void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
 
         case ID_MOVE_DOWN:
             moveLayer(wnd, 1);
+            break;
+
+        case ID_LAYERS:
+            if (HIWORD(wp) == LBN_SELCHANGE) {
+                int selection = getSelectedLayer(wnd);
+
+                if (selection >= 0)
+                    layers.drawAtFast(GetDlgItem(wnd, ID_PREVIEW), selection);
+            }
+
             break;
     }
 }
@@ -212,6 +236,10 @@ LRESULT wndProc(HWND wnd, UINT msg, WPARAM wp, LPARAM lp) {
         case WM_CREATE:
             initWindow(wnd);
             return 1;
+
+        case WM_PAINT:
+            paint(wnd);
+            return 0;
     }
 
     return DefWindowProcA(wnd, msg, wp, lp);
