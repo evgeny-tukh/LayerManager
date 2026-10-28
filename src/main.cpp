@@ -1,9 +1,11 @@
 #include <cstdio>
+#include <memory>
 
 #include <Windows.h>
 
 #include "resource.h"
 #include "layers.hpp"
+#include "img_wnd.hpp"
 
 namespace {
 const char *mainWndName = "Layer Manager v1";
@@ -15,6 +17,8 @@ const char *layerAddStr = "Add Layer";
 const int layerListWidth = 300;
 
 Layers layers;
+
+std::shared_ptr<ImgWnd> imgWnd;
 
 HINSTANCE getInstanceHandle(HWND wnd) {
     return reinterpret_cast<HINSTANCE>(GetWindowLongPtr(wnd, GWLP_HINSTANCE));
@@ -77,7 +81,7 @@ void initWindow(HWND wnd) {
     CreateWindowA(
         "LISTBOX",
         "",
-        WS_VISIBLE|WS_CHILD|WS_BORDER|LBS_NOINTEGRALHEIGHT|LBS_STANDARD|LBS_NOTIFY,
+        WS_VISIBLE|WS_CHILD|WS_BORDER|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY,
         0,
         0,
         layerListWidth,
@@ -88,19 +92,9 @@ void initWindow(HWND wnd) {
         nullptr
     );
 
-    CreateWindowA(
-        "STATIC",
-        "",
-        WS_VISIBLE|WS_CHILD|WS_BORDER|SS_BITMAP|WM_HSCROLL|WM_VSCROLL,
-        layerListWidth,
-        0,
-        client.right - layerListWidth,
-        client.bottom,
-        wnd,
-        reinterpret_cast<HMENU>(ID_PREVIEW),
-        instance,
-        nullptr
-    );
+    imgWnd = std::make_shared<ImgWnd>(instance, layers);
+
+    imgWnd->create(wnd, layerListWidth, 0, client.right - layerListWidth, client.bottom);
 }
 
 bool processSysCommand(HWND wnd, WPARAM wp, LPARAM lp) {
@@ -134,7 +128,8 @@ void addLayer(HWND wnd) {
         int item = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_ADDSTRING, 0, reinterpret_cast<WPARAM>(buf)));
         selectLayerItem(wnd, item);
         layers.addLayer(buf);
-        layers.drawAtFast(GetDlgItem(wnd, ID_PREVIEW), item);
+        imgWnd->setSelectedLayer(item);
+        InvalidateRect(GetDlgItem(wnd, ID_PREVIEW), NULL, TRUE);
     }
 }
 
@@ -205,8 +200,11 @@ void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
             if (HIWORD(wp) == LBN_SELCHANGE) {
                 int selection = getSelectedLayer(wnd);
 
-                if (selection >= 0)
-                    layers.drawAtFast(GetDlgItem(wnd, ID_PREVIEW), selection);
+                if (selection >= 0) {
+                    imgWnd->setSelectedLayer(selection);
+                    InvalidateRect(GetDlgItem(wnd, ID_PREVIEW), NULL, TRUE);
+                    //layers.drawAt(GetDlgItem(wnd, ID_PREVIEW), selection);
+                }
             }
 
             break;

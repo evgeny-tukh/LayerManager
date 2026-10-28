@@ -10,6 +10,8 @@ add_executable(
     layerMgr
     ${SRC_PATH}/main.cpp
     ${SRC_PATH}/layers.cpp
+    ${SRC_PATH}/layer.cpp
+    ${SRC_PATH}/img_wnd.cpp
     ${SRC_PATH}/main.rc
 )
 

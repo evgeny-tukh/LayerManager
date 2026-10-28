@@ -23,81 +23,53 @@ bool loadTiff(const char *file) {
 }
 
 void Layers::addLayer(const char *file) {
-    std::string filePath(file);
-    cv::Mat img = cv::imread(filePath, cv::IMREAD_UNCHANGED);
-
-    if (!img.empty())
-        _container.emplace_back(ImgItem(filePath, img));
+    _container.emplace_back(file);
 }
 
 const std::string& Layers::name(size_t index) const {
     if (index >= _container.size())
         return emptyStr;
         
-    return _container[index].first;
+    return _container[index].name();
 }
 
-const Layers::OptImage Layers::img(size_t index) const {
+const cv::Mat& Layers::image(size_t index) const {
     if (index >= _container.size())
         return {};
 
-    return _container[index].second;
+    return _container[index].image();
 }
 
-const Layers::OptPixel Layers::pixel(size_t index, int x, int y) const {
-    auto image = img(index);
-
-    if (!image.has_value())
+const cv::Vec3b& Layers::pixel(size_t index, int x, int y) const {
+    if (index >= _container.size())
         return {};
 
-    return image.value().at<cv::Vec3b>(y, x);
+    return _container[index].image();
 }
 
 const size_t Layers::width(size_t index) const {
-    auto image = img(index);
-
-    if (!image.has_value())
+    if (index >= _container.size())
         return 0;
-        
-    return image.value().cols;
+
+    return _container[index].width();
 }
 
 const size_t Layers::height(size_t index) const {
-    auto image = img(index);
-
-    if (!image.has_value())
+    if (index >= _container.size())
         return 0;
-        
-    return image.value().rows;
+
+    return _container[index].height();
 }
 
 void Layers::drawAt(HDC ctx, size_t index) {
-    auto image = img(index);
-
-    if (!image.has_value())
-        return;
-
-    cv::Mat& img = image.value();
-
-    int width = img.cols;
-    int height = img.rows;
-
-    for (int x = 0; x < width; ++x) {
-        for (int y = 0; y < height; ++y) {
-            cv::Vec3b& pixel = img.at<cv::Vec3b>(y, x);
-
-            auto blue = pixel[0];
-            auto green = pixel[1];
-            auto red = pixel[2];
-
-            SetPixel(ctx, x, y, RGB(red, green, blue));
-        }
-    }
+    if (index < _container.size())
+        _container[index].draw(ctx);
 }
 
 void Layers::drawAtFast(HWND wnd, size_t index) {
+    #if 0
     HDC ctx = GetDC(wnd);
-    auto image = img(index);
+    auto image = image(index);
     RECT client;
 
     GetClientRect(wnd, &client);
@@ -136,6 +108,7 @@ void Layers::drawAtFast(HWND wnd, size_t index) {
 
     SetDIBitsToDevice(ctx, 0, 0, width, height, 0, 0, 0, height, raster.data(), &bmi, DIB_RGB_COLORS);
     ReleaseDC(wnd, ctx);
+    #endif
 }
 
 void Layers::drawAt(HWND wnd, size_t index) {
