@@ -154,3 +154,15 @@ void Layers::compose() {
         }
     }
 }
+
+void Layers::erase(size_t index) {
+    if (index < _container.size())
+        _container.erase(_container.begin() + index);
+}
+
+void Layers::swapItems(size_t index, int direction) {
+    int index2 = (signed) index + direction;
+
+    if (index2 >= 0 && (signed) index2 < _container.size())
+        std::swap (_container[index], _container[index2]);
+}

@@ -28,6 +28,9 @@ class Layers {
 
         size_t size() const { return _container.size(); }
 
+        void erase(size_t index);
+        void swapItems(size_t index, int direction);
+
         Layer& operator[](size_t index) { return _container[index]; }
 
         Layer& composition() { return _composition; }

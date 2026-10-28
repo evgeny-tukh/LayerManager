@@ -147,6 +147,7 @@ void removeLayer(HWND wnd) {
 
     if (confirm(wnd, text)) {
         removeLayerItem(wnd, selection);
+        layers.erase(selection);
     }
 }
 
@@ -169,6 +170,7 @@ void moveLayer(HWND wnd, int direction) {
     getLayerName(wnd, selection, layerName);
     removeLayerItem(wnd, selection);
     SendDlgItemMessageA(wnd, ID_LAYERS, LB_INSERTSTRING, newIndex, reinterpret_cast<LPARAM>(layerName));
+    layers.swapItems(selection, direction);
     selectLayerItem(wnd, newIndex);
 }
 
