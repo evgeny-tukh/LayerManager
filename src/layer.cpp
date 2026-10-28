@@ -30,7 +30,7 @@ Layer::~Layer() {
 }
 
 void Layer::draw(HDC hdc) {
-    if (_img.empty())
+    if (_img.cols == 0 && _img.rows == 0)
         return;
 
     HDC screenDC = GetDC(HWND_DESKTOP);
@@ -62,4 +62,18 @@ const cv::Vec3b& Layer::pixel(int x, int y) const {
         return emptyPixel;
 
     return _img.at<cv::Vec3b>(y, x);
+}
+
+void Layer::setPixel(int x, int y, RGBQUAD clr) {
+    int index = static_cast<int>(y * width() + x);
+    _pixelBuffer[index] = clr;
+}
+
+void Layer::setSize(int width, int height, RGBQUAD transpClr) {
+    _img.cols = width;
+    _img.rows = height;
+
+    _pixelBuffer.resize(width * height);
+
+    for (size_t i = 0; i < _pixelBuffer.size(); _pixelBuffer[i++] = transpClr);
 }

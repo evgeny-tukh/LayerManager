@@ -8,6 +8,7 @@
 
 class Layer {
     public:
+        Layer() {}
         Layer(const char *imgFile);
         ~Layer();
 
@@ -18,6 +19,9 @@ class Layer {
         const cv::Vec3b& pixel(int x, int y) const;
         const size_t width() const { return _img.cols; }
         const size_t height() const { return _img.rows; }
+
+        void setSize(int width, int height, RGBQUAD transpClr);
+        void setPixel(int x, int y, RGBQUAD clr);
 
     private:
         std::string _imgFile;

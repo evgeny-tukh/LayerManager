@@ -8,7 +8,9 @@
 
 namespace {
 std::string emptyStr;
+const RGBQUAD transpColor { 255, 255, 255, 0 };
 }
+
 bool loadTiff(const char *file) {
     std::string filePath(file);
     cv::Mat img = cv::imread(filePath, cv::IMREAD_UNCHANGED);
@@ -117,4 +119,38 @@ void Layers::drawAt(HWND wnd, size_t index) {
     drawAt(ctx, index);
 
     ReleaseDC(wnd, ctx);
+}
+
+void Layers::compose() {
+    int maxWidth = 0;
+    int maxHeight = 0;
+
+    for (const auto& layer: _container) {
+        if (layer.width() > maxWidth)
+            maxWidth = static_cast<int>(layer.width());
+
+        if (layer.height() > maxHeight)
+            maxHeight = static_cast<int>(layer.height());
+    }
+
+    _composition.setSize(maxWidth, maxHeight, transpColor);
+
+    for (int x = 0; x < maxWidth; ++x) {
+        for (int y = 0; y < maxWidth; ++y) {
+            for (const auto& layer: _container) {
+                const auto& pixel = layer.pixel(x, y);
+
+                if (memcmp(&pixel, &transpColor, 3) != 0) {
+                    RGBQUAD rgb;
+
+                    rgb.rgbBlue = pixel[0];
+                    rgb.rgbGreen = pixel[1];
+                    rgb.rgbRed = pixel[0];
+                    rgb.rgbReserved = 0;
+
+                    _composition.setPixel(x, y, rgb);
+                }
+            }
+        }
+    }
 }

@@ -15,6 +15,8 @@
 #define ID_MOVE_UP      1007
 #define ID_MOVE_DOWN    1008
 
+#define ID_COMPOSE      1100
+
 #define ID_LAYERS       2000
 #define ID_PREVIEW      2001
 

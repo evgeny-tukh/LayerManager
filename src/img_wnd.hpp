@@ -6,6 +6,11 @@
 
 class ImgWnd {
     public:
+        enum Constants {
+            COMPOSITION = 0xFFFF,
+        };
+
+    public:
         ImgWnd(HINSTANCE instance, Layers& layers);
 
         void move(int x, int y, int width, int height);

@@ -20,5 +20,7 @@ ID_MAINMENU MENU
         MENUITEM "&Remove layer", ID_REMOVE
         MENUITEM "&Move layer &up", ID_MOVE_UP
         MENUITEM "&Move layer &down", ID_MOVE_DOWN
+        MENUITEM SEPARATOR
+        MENUITEM "&Compose", ID_COMPOSE
     }
 }

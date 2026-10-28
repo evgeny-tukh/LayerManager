@@ -11,6 +11,8 @@
 class Layers {
     public:
     public:
+        Layers() {}
+
         void addLayer(const char *file);
 
         const std::string& name(size_t index) const;
@@ -28,8 +30,13 @@ class Layers {
 
         Layer& operator[](size_t index) { return _container[index]; }
 
+        Layer& composition() { return _composition; }
+
+        void compose();
+
     private:
         std::vector<Layer> _container;
+        Layer _composition;
 };
 
 bool loadTiff(const char *file);

@@ -63,7 +63,9 @@ void ImgWnd::paint() {
     PAINTSTRUCT ps;
     HDC paintDC = BeginPaint(_wnd, &ps);
 
-    if (_selectedLayer >= 0 && _selectedLayer < _layers.size())
+    if (_selectedLayer == COMPOSITION)
+        _layers.composition().draw(paintDC);
+    else if (_selectedLayer >= 0 && _selectedLayer < _layers.size())
         _layers[_selectedLayer].draw(paintDC);
 
     EndPaint(_wnd, &ps);

@@ -196,6 +196,12 @@ void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
             moveLayer(wnd, 1);
             break;
 
+        case ID_COMPOSE:
+            layers.compose();
+            imgWnd->setSelectedLayer(ImgWnd::COMPOSITION);
+            InvalidateRect(GetDlgItem(wnd, ID_PREVIEW), NULL, TRUE);
+            break;
+
         case ID_LAYERS:
             if (HIWORD(wp) == LBN_SELCHANGE) {
                 int selection = getSelectedLayer(wnd);
@@ -203,7 +209,6 @@ void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
                 if (selection >= 0) {
                     imgWnd->setSelectedLayer(selection);
                     InvalidateRect(GetDlgItem(wnd, ID_PREVIEW), NULL, TRUE);
-                    //layers.drawAt(GetDlgItem(wnd, ID_PREVIEW), selection);
                 }
             }
 
