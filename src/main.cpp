@@ -2,6 +2,7 @@
 #include <memory>
 
 #include <Windows.h>
+#include <commctrl.h>
 
 #include "resource.h"
 #include "layers.hpp"
@@ -279,6 +280,13 @@ int WinMain(HINSTANCE inst, HINSTANCE prevInst, char *cmdLine, int showCmd) {
     if (!MainWnd::registerCls(inst))
         return 1;
 
+    INITCOMMONCONTROLSEX data;
+
+    data.dwSize = sizeof(data);
+    data.dwICC = ICC_WIN95_CLASSES;
+
+    InitCommonControlsEx(&data);
+    
     auto mainMenu = LoadMenuA(inst, MAKEINTRESOURCEA(ID_MAINMENU));
 
     auto mainWnd = CreateWindowA(

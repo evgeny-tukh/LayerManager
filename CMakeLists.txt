@@ -85,5 +85,6 @@ target_link_libraries(
     uuid
     comdlg32
     advapi32
+    comctl32
 )
 
