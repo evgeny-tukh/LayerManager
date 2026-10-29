@@ -6,6 +6,7 @@
 #include "resource.h"
 #include "layers.hpp"
 #include "img_wnd.hpp"
+#include "layer_props_wnd.hpp"
 
 namespace {
 const char *mainWndName = "Layer Manager v1";
@@ -15,10 +16,12 @@ const char *layerFilters = "TIFF files (*.tiff;*.tif)\0*.tiff;*.tif\0All files\0
 const char *layerAddStr = "Add Layer";
 
 const int layerListWidth = 300;
+const int layerPropsHeight = 230;
 
 Layers layers;
 
 std::shared_ptr<ImgWnd> imgWnd;
+std::shared_ptr<LayerPropsWnd> layerPropsWnd;
 
 HINSTANCE getInstanceHandle(HWND wnd) {
     return reinterpret_cast<HINSTANCE>(GetWindowLongPtr(wnd, GWLP_HINSTANCE));
@@ -68,8 +71,9 @@ void paint(HWND wnd) {
 }
 
 void onResize(HWND wnd, unsigned width, unsigned height) {
-    MoveWindow(GetDlgItem(wnd, ID_LAYERS), 0, 0, layerListWidth, height, true);
+    MoveWindow(GetDlgItem(wnd, ID_LAYERS), 0, 0, layerListWidth, height - layerPropsHeight, true);
     MoveWindow(GetDlgItem(wnd, ID_PREVIEW), layerListWidth, 0, width - layerListWidth, height, true);
+    MoveWindow(GetDlgItem(wnd, ID_LAYER_PROPS), 0, height - layerPropsHeight, layerListWidth, layerPropsHeight, true);
 }
 
 void initWindow(HWND wnd) {
@@ -85,7 +89,7 @@ void initWindow(HWND wnd) {
         0,
         0,
         layerListWidth,
-        client.bottom,
+        client.bottom - layerPropsHeight,
         wnd,
         reinterpret_cast<HMENU>(ID_LAYERS),
         instance,
@@ -93,8 +97,10 @@ void initWindow(HWND wnd) {
     );
 
     imgWnd = std::make_shared<ImgWnd>(instance, layers);
+    layerPropsWnd = std::make_shared<LayerPropsWnd>(instance, layers);
 
-    imgWnd->create(wnd, layerListWidth, 0, client.right - layerListWidth, client.bottom);
+    imgWnd->create(wnd, ID_PREVIEW, layerListWidth, 0, client.right - layerListWidth, client.bottom);
+    layerPropsWnd->create(wnd, ID_LAYER_PROPS, 0, client.bottom - layerPropsHeight, layerListWidth, layerPropsHeight);
 }
 
 bool processSysCommand(HWND wnd, WPARAM wp, LPARAM lp) {

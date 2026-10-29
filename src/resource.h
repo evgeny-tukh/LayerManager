@@ -17,7 +17,19 @@
 
 #define ID_COMPOSE      1100
 
+#define ID_X_OFFSET     1101
+#define ID_Y_OFFSET     1102
+#define ID_ANGLE        1103
+#define ID_RED          1104
+#define ID_GREEN        1105
+#define ID_BLUE         1106
+#define ID_COLOR_BOX    1107
+#define ID_SELECT_COLOR 1108
+#define ID_APPLY        1109
+
 #define ID_LAYERS       2000
 #define ID_PREVIEW      2001
+#define ID_LAYER_PROPS  2002
+
 
 

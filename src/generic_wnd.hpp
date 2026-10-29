@@ -10,13 +10,15 @@ class GenericWnd {
     public:
         GenericWnd(HINSTANCE instance, const char *clsName);
 
-        void move(int x, int y, int width, int height);
+        void move(int x, int y, int width, int height) const;
 
         HWND operator()() const { return _wnd; }
 
-        void create(HWND parent, int x, int y, int width, int height);
+        void create(HWND parent, uint64_t id, int x, int y, int width, int height);
 
         virtual void onCreate(HWND wnd, WPARAM wp, LPARAM lp) {}
+
+        void setHandle(HWND wnd) { _wnd = wnd; }
 
         static GenericWnd *getSelf(HWND wnd);
 
@@ -28,5 +30,10 @@ class GenericWnd {
         std::string _clsName;
 
     protected:
-        GenericWnd *getSelf();
+        GenericWnd *getSelf() const;
+
+        void createLabel(const char *text, int x, int y, int width, int height) const;
+        HWND createImage(uint64_t id, int x, int y, int width, int height) const;
+        HWND createEditor(uint64_t id, int x, int y, int width, int height, const char *text = "") const;
+        HWND createButton(uint64_t id, int x, int y, int width, int height, const char *text = "") const;
 };

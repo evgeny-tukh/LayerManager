@@ -7,12 +7,15 @@
 
 class LayerPropsWnd: public GenericWnd {
     public:
-        LayerPropsWnd(HINSTANCE instance, Layer& layer);
+        LayerPropsWnd(HINSTANCE instance, Layers& layers);
 
         bool processMessage(HWND wnd, UINT msg, WPARAM wp, LPARAM lp) override;
 
         void onCreate(HWND wnd, WPARAM wp, LPARAM lp) override;
 
+        void setLayerIndex(int index) { _selection = index; }
+        
     private:
-        Layer& _layer;
+        Layers& _layers;
+        int _selection;
 };
