@@ -141,14 +141,14 @@ void Layers::compose() {
                 const auto& pixel = layer.pixel(x, y);
 
                 if (memcmp(&pixel, &transpColor, 3) != 0) {
-                    RGBQUAD rgb;
+                    /*RGBQUAD rgb;
 
                     rgb.rgbBlue = pixel[0];
                     rgb.rgbGreen = pixel[1];
                     rgb.rgbRed = pixel[0];
-                    rgb.rgbReserved = 0;
+                    rgb.rgbReserved = 0;*/
 
-                    _composition.setPixel(x, y, rgb);
+                    _composition.setPixel(x, y, /*rgb*/layer.getFillColor());
                 }
             }
         }
