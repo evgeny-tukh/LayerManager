@@ -13,7 +13,7 @@ class LayerPropsWnd: public GenericWnd {
 
         void onCreate(HWND wnd, WPARAM wp, LPARAM lp) override;
 
-        void setLayerIndex(int index) { _selection = index; }
+        void setLayerIndex(int index);
 
     private:
         Layers& _layers;
@@ -24,6 +24,8 @@ class LayerPropsWnd: public GenericWnd {
         COLORREF _customColors[16];
 
     private:
+        void apply();
+
         void selectColor(HWND wnd);
 
         void processCommand(HWND wnd, UINT cmd);

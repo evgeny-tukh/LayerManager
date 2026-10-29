@@ -49,6 +49,10 @@ void LayerPropsWnd::selectColor(HWND wnd) {
 
 void LayerPropsWnd::processCommand(HWND wnd, UINT cmd) {
     switch (cmd) {
+        case ID_APPLY:
+            apply();
+            break;
+
         case ID_SELECT_COLOR:
             selectColor(wnd);
             break;
@@ -111,4 +115,48 @@ void LayerPropsWnd::showColor() {
     FillRect(hdc, &client, brush);
     DeleteObject(brush);
     ReleaseDC(wnd, hdc);
+}
+
+void LayerPropsWnd::apply() {
+    if (_selection >= 0) {
+        obtainColorComponents();
+
+        RGBQUAD fillColor;
+        fillColor.rgbBlue = _blue;
+        fillColor.rgbGreen = _green;
+        fillColor.rgbRed = _red;
+        fillColor.rgbReserved = 0;
+
+        Layer& layer = _layers[_selection];
+
+        int offsetX = GetDlgItemInt(_wnd, ID_X_OFFSET, NULL, TRUE);
+        int offsetY = GetDlgItemInt(_wnd, ID_Y_OFFSET, NULL, TRUE);
+        int turnAngle = GetDlgItemInt(_wnd, ID_ANGLE, NULL, TRUE);
+
+        layer.setFillColor(fillColor);
+        layer.setOffset(offsetX, offsetY);
+        layer.setTurnAngle(turnAngle);
+    }
+}
+
+void LayerPropsWnd::setLayerIndex(int index) {
+    _selection = index;
+    Layer& layer = _layers[_selection];
+
+    auto fillColor = layer.getFillColor();
+    _red = fillColor.rgbRed;
+    _green = fillColor.rgbGreen;
+    _blue = fillColor.rgbBlue;
+
+    int offsetX;
+    int offsetY;
+    int turnAngle = layer.getTurnAngle();
+    layer.getOffset(offsetX, offsetY);
+
+    SetDlgItemInt(_wnd, ID_X_OFFSET, offsetX, TRUE);
+    SetDlgItemInt(_wnd, ID_Y_OFFSET, offsetY, TRUE);
+    SetDlgItemInt(_wnd, ID_ANGLE, turnAngle, TRUE);
+    SetDlgItemInt(_wnd, ID_RED, _red, FALSE);
+    SetDlgItemInt(_wnd, ID_GREEN, _green, FALSE);
+    SetDlgItemInt(_wnd, ID_BLUE, _blue, FALSE);
 }

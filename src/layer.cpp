@@ -2,9 +2,10 @@
 
 namespace {
 const cv::Vec3b emptyPixel { 0, 0, 0 };
+const RGBQUAD defFill { 127, 127, 127, 0 };
 }
 
-Layer::Layer(const char *imgFile): _imgFile(imgFile), _xOffset(0), _yOffset(0) {
+Layer::Layer(const char *imgFile): _imgFile(imgFile), _xOffset(0), _yOffset(0), _turnAngle(0), _fillColor(defFill) {
     _img = cv::imread(imgFile, cv::IMREAD_UNCHANGED);
 
     if (!_img.empty()) {
@@ -76,4 +77,14 @@ void Layer::setSize(int width, int height, RGBQUAD transpClr) {
     _pixelBuffer.resize(width * height);
 
     for (size_t i = 0; i < _pixelBuffer.size(); _pixelBuffer[i++] = transpClr);
+}
+
+void Layer::getOffset(int& xOffset, int& yOffset) const {
+    xOffset = _xOffset;
+    yOffset = _yOffset;
+}
+
+void Layer::setOffset(int xOffset, int yOffset) {
+    _xOffset = xOffset;
+    _yOffset = yOffset;
 }

@@ -14,7 +14,7 @@ class GenericWnd {
 
         HWND operator()() const { return _wnd; }
 
-        void create(HWND parent, uint64_t id, int x, int y, int width, int height);
+        void create(HWND parent, uint64_t id, int x, int y, int width, int height, bool visible = true);
 
         virtual void onCreate(HWND wnd, WPARAM wp, LPARAM lp) {}
 
@@ -23,6 +23,9 @@ class GenericWnd {
         static GenericWnd *getSelf(HWND wnd);
 
         virtual bool processMessage(HWND wnd, UINT msg, WPARAM wp, LPARAM lp) { return false; }
+
+        void show() const;
+        void hide() const;
 
     protected:
         HINSTANCE _instance;

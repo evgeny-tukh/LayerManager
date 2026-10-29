@@ -62,11 +62,13 @@ GenericWnd *GenericWnd::getSelf(HWND wnd) {
     return reinterpret_cast<ImgWnd *>(GetWindowLongPtr(wnd, GWLP_USERDATA));
 }
 
-void GenericWnd::create(HWND parent, uint64_t id, int x, int y, int width, int height) {
-    _wnd = CreateWindowA(_clsName.c_str(), "", WS_CHILD|WS_VISIBLE|WS_BORDER, x, y, width, height, parent, reinterpret_cast<HMENU>(id), _instance, this);
+void GenericWnd::create(HWND parent, uint64_t id, int x, int y, int width, int height, bool visible) {
+    _wnd = CreateWindowA(_clsName.c_str(), "", WS_CHILD|WS_BORDER, x, y, width, height, parent, reinterpret_cast<HMENU>(id), _instance, this);
 
-    ShowWindow(_wnd, SW_SHOW);
-    UpdateWindow(_wnd);
+    if (visible) {
+        ShowWindow(_wnd, SW_SHOW);
+        UpdateWindow(_wnd);
+    }
 }
 
 void GenericWnd::move(int x, int y, int width, int height) const {
@@ -87,4 +89,13 @@ HWND GenericWnd::createEditor(uint64_t id, int x, int y, int width, int height, 
 
 HWND GenericWnd::createButton(uint64_t id, int x, int y, int width, int height, const char *text) const {
     return CreateWindowA(clsButton, text, BS_PUSHBUTTON|WS_CHILD|WS_VISIBLE|WS_BORDER, x, y, width, height, _wnd, reinterpret_cast<HMENU>(id), _instance, NULL);
+}
+
+void GenericWnd::show() const {
+    ShowWindow(_wnd, SW_SHOW);
+    UpdateWindow(_wnd);
+}
+
+void GenericWnd::hide() const {
+    ShowWindow(_wnd, SW_HIDE);
 }

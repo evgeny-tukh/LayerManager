@@ -101,7 +101,7 @@ void initWindow(HWND wnd) {
     layerPropsWnd = std::make_shared<LayerPropsWnd>(instance, layers);
 
     imgWnd->create(wnd, ID_PREVIEW, layerListWidth, 0, client.right - layerListWidth, client.bottom);
-    layerPropsWnd->create(wnd, ID_LAYER_PROPS, 0, client.bottom - layerPropsHeight, layerListWidth, layerPropsHeight);
+    layerPropsWnd->create(wnd, ID_LAYER_PROPS, 0, client.bottom - layerPropsHeight, layerListWidth, layerPropsHeight, false);
 }
 
 bool processSysCommand(HWND wnd, WPARAM wp, LPARAM lp) {
@@ -136,6 +136,8 @@ void addLayer(HWND wnd) {
         selectLayerItem(wnd, item);
         layers.addLayer(buf);
         imgWnd->setSelectedLayer(item);
+        layerPropsWnd->show();
+        layerPropsWnd->setLayerIndex(item);
         InvalidateRect(GetDlgItem(wnd, ID_PREVIEW), NULL, TRUE);
     }
 }
@@ -208,6 +210,7 @@ void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
         case ID_COMPOSE:
             layers.compose();
             imgWnd->setSelectedLayer(ImgWnd::COMPOSITION);
+            layerPropsWnd->hide();
             InvalidateRect(GetDlgItem(wnd, ID_PREVIEW), NULL, TRUE);
             break;
 
@@ -217,6 +220,8 @@ void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
 
                 if (selection >= 0) {
                     imgWnd->setSelectedLayer(selection);
+                    layerPropsWnd->show();
+                    layerPropsWnd->setLayerIndex(selection);
                     InvalidateRect(GetDlgItem(wnd, ID_PREVIEW), NULL, TRUE);
                 }
             }
@@ -286,7 +291,7 @@ int WinMain(HINSTANCE inst, HINSTANCE prevInst, char *cmdLine, int showCmd) {
     data.dwICC = ICC_WIN95_CLASSES;
 
     InitCommonControlsEx(&data);
-    
+
     auto mainMenu = LoadMenuA(inst, MAKEINTRESOURCEA(ID_MAINMENU));
 
     auto mainWnd = CreateWindowA(

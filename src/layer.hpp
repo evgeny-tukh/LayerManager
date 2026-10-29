@@ -23,10 +23,21 @@ class Layer {
         void setSize(int width, int height, RGBQUAD transpClr);
         void setPixel(int x, int y, RGBQUAD clr);
 
+        void getOffset(int& xOffset, int& yOffset) const;
+        void setOffset(int xOffset, int yOffset);
+
+        void setFillColor(RGBQUAD color) { _fillColor = color; }
+        RGBQUAD getFillColor() const { return _fillColor; }
+
+        int getTurnAngle() const { return _turnAngle; }
+        void setTurnAngle(int angle) { _turnAngle = angle; }
+
     private:
+        RGBQUAD _fillColor;
         std::string _imgFile;
         cv::Mat _img;
         int _xOffset;
         int _yOffset;
+        int _turnAngle;
         std::vector<RGBQUAD> _pixelBuffer;
 };
