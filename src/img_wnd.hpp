@@ -3,8 +3,9 @@
 #include <Windows.h>
 
 #include "layers.hpp"
+#include "generic_wnd.hpp"
 
-class ImgWnd {
+class ImgWnd: public GenericWnd {
     public:
         enum Constants {
             COMPOSITION = 0xFFFF,
@@ -13,18 +14,13 @@ class ImgWnd {
     public:
         ImgWnd(HINSTANCE instance, Layers& layers);
 
-        void move(int x, int y, int width, int height);
         void paint();
-
-        HWND operator()() const { return _wnd; }
 
         void setSelectedLayer(int layer) { _selectedLayer = layer; }
 
-        void create(HWND parent, int x, int y, int width, int height);
+        bool processMessage(HWND wnd, UINT msg, WPARAM wp, LPARAM lp) override;
 
     private:
-        HINSTANCE _instance;
-        HWND _wnd;
         Layers& _layers;
         int _selectedLayer;
 };

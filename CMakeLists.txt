@@ -12,6 +12,8 @@ add_executable(
     ${SRC_PATH}/layers.cpp
     ${SRC_PATH}/layer.cpp
     ${SRC_PATH}/img_wnd.cpp
+    ${SRC_PATH}/generic_wnd.cpp
+    ${SRC_PATH}/layer_props_wnd.cpp
     ${SRC_PATH}/main.rc
 )
 

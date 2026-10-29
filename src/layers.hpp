@@ -10,7 +10,6 @@
 
 class Layers {
     public:
-    public:
         Layers() {}
 
         void addLayer(const char *file);
