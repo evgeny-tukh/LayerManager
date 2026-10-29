@@ -27,4 +27,7 @@ class LayerPropsWnd: public GenericWnd {
         void selectColor(HWND wnd);
 
         void processCommand(HWND wnd, UINT cmd);
+
+        void showColor();
+        void obtainColorComponents();
 };

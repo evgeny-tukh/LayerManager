@@ -15,14 +15,18 @@ LayerPropsWnd::LayerPropsWnd(HINSTANCE instance, Layers& layers):
     memset(_customColors, 0, sizeof(_customColors));
 }
 
+void LayerPropsWnd::obtainColorComponents() {
+    _red = GetDlgItemInt(_wnd, ID_RED, NULL, FALSE);
+    _green = GetDlgItemInt(_wnd, ID_GREEN, NULL, FALSE);
+    _blue = GetDlgItemInt(_wnd, ID_BLUE, NULL, FALSE);
+}
+
 void LayerPropsWnd::selectColor(HWND wnd) {
     CHOOSECOLORA data;
     
     memset(&data, 0, sizeof(data));
 
-    _red = GetDlgItemInt(wnd, ID_RED, NULL, FALSE);
-    _green = GetDlgItemInt(wnd, ID_GREEN, NULL, FALSE);
-    _blue = GetDlgItemInt(wnd, ID_BLUE, NULL, FALSE);
+    obtainColorComponents();
 
     data.lStructSize = sizeof(data);
     data.hwndOwner = wnd;
@@ -38,6 +42,8 @@ void LayerPropsWnd::selectColor(HWND wnd) {
         SetDlgItemInt(wnd, ID_RED, _red, FALSE);
         SetDlgItemInt(wnd, ID_GREEN, _green, FALSE);
         SetDlgItemInt(wnd, ID_BLUE, _blue, FALSE);
+
+        showColor();
     }
 }
 
@@ -45,6 +51,21 @@ void LayerPropsWnd::processCommand(HWND wnd, UINT cmd) {
     switch (cmd) {
         case ID_SELECT_COLOR:
             selectColor(wnd);
+            break;
+
+        case ID_RED:
+            _red = GetDlgItemInt(_wnd, ID_RED, NULL, FALSE);
+            showColor();
+            break;
+            
+        case ID_GREEN:
+            _green = GetDlgItemInt(_wnd, ID_GREEN, NULL, FALSE);
+            showColor();
+            break;
+            
+        case ID_BLUE:
+            _blue = GetDlgItemInt(_wnd, ID_BLUE, NULL, FALSE);
+            showColor();
             break;
     }
 }
@@ -76,4 +97,18 @@ void LayerPropsWnd::onCreate(HWND wnd, WPARAM wp, LPARAM lp) {
     createImage(ID_COLOR_BOX, 150, 100, 80, 80);
     createButton(ID_SELECT_COLOR, 240, 100, 50, 80, "...");
     createButton(ID_APPLY, 150, 190, 140, 30, "Apply...");
+
+    showColor();
+}
+
+void LayerPropsWnd::showColor() {
+    auto wnd = GetDlgItem(_wnd, ID_COLOR_BOX);
+    auto hdc = GetDC(wnd);
+    auto brush = CreateSolidBrush(RGB(_red, _green, _blue));
+ 
+    RECT client;
+    GetClientRect(wnd, &client);
+    FillRect(hdc, &client, brush);
+    DeleteObject(brush);
+    ReleaseDC(wnd, hdc);
 }
