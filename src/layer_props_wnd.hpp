@@ -32,4 +32,8 @@ class LayerPropsWnd: public GenericWnd {
 
         void showColor();
         void obtainColorComponents();
+
+        void setShowRotated();
+
+        void forceUpdatePreviewWnd();
 };

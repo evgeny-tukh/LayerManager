@@ -51,6 +51,7 @@ void LayerPropsWnd::processCommand(HWND wnd, UINT cmd) {
     switch (cmd) {
         case ID_APPLY:
             apply();
+            forceUpdatePreviewWnd();
             break;
 
         case ID_SELECT_COLOR:
@@ -70,6 +71,11 @@ void LayerPropsWnd::processCommand(HWND wnd, UINT cmd) {
         case ID_BLUE:
             _blue = GetDlgItemInt(_wnd, ID_BLUE, NULL, FALSE);
             showColor();
+            break;
+        
+        case ID_SHOW_ROTATED:
+            setShowRotated();
+            forceUpdatePreviewWnd();
             break;
     }
 }
@@ -160,4 +166,15 @@ void LayerPropsWnd::setLayerIndex(int index) {
     SetDlgItemInt(_wnd, ID_RED, _red, FALSE);
     SetDlgItemInt(_wnd, ID_GREEN, _green, FALSE);
     SetDlgItemInt(_wnd, ID_BLUE, _blue, FALSE);
+}
+
+void LayerPropsWnd::setShowRotated() {
+    if (_selection < 0)
+        return;
+
+    _layers[_selection].showRotated(IsDlgButtonChecked(_wnd, ID_SHOW_ROTATED) == BST_CHECKED);
+}
+
+void LayerPropsWnd::forceUpdatePreviewWnd() {
+    InvalidateRect(getSibling(ID_PREVIEW), NULL, TRUE);
 }

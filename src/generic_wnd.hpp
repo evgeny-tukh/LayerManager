@@ -15,6 +15,8 @@ class GenericWnd {
         void move(int x, int y, int width, int height) const;
 
         HWND operator()() const { return _wnd; }
+        HWND getParent() const { return GetParent(_wnd); }
+        HWND getSibling(unsigned int id) { return GetDlgItem(getParent(), id); }
 
         void create(HWND parent, uint64_t id, int x, int y, int width, int height, bool visible = true);
 

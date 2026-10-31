@@ -88,7 +88,7 @@ HWND GenericWnd::createImage(uint64_t id, int x, int y, int width, int height) c
 }
 
 HWND GenericWnd::createEditor(uint64_t id, int x, int y, int width, int height, const char *text) const {
-    return createChild(clsEdit, x, y, width, height, id, text, ES_NUMBER|WS_BORDER|ES_CENTER);
+    return createChild(clsEdit, x, y, width, height, id, text, WS_BORDER|ES_CENTER);
 }
 
 HWND GenericWnd::createButton(uint64_t id, int x, int y, int width, int height, const char *text, unsigned int style) const {

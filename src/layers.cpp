@@ -7,7 +7,9 @@
 #include "layers.hpp"
 
 namespace {
-std::string emptyStr;
+const std::string emptyStr;
+const cv::Mat emptyMatrix;
+const cv::Vec3b emptyPixel;
 const RGBQUAD transpColor { 255, 255, 255, 0 };
 }
 
@@ -37,14 +39,14 @@ const std::string& Layers::name(size_t index) const {
 
 const cv::Mat& Layers::image(size_t index) const {
     if (index >= _container.size())
-        return {};
+        return emptyMatrix;
 
     return _container[index].image();
 }
 
 const cv::Vec3b& Layers::pixel(size_t index, int x, int y) const {
     if (index >= _container.size())
-        return {};
+        return emptyPixel;
 
     return _container[index].image();
 }
@@ -138,17 +140,11 @@ void Layers::compose() {
     for (int x = 0; x < maxWidth; ++x) {
         for (int y = 0; y < maxWidth; ++y) {
             for (const auto& layer: _container) {
-                const auto& pixel = layer.pixel(x, y);
+                bool useRotation = layer.getTurnAngle() != 0;
+                const auto& pixel = layer.pixel(x, y, useRotation);
 
                 if (memcmp(&pixel, &transpColor, 3) != 0) {
-                    /*RGBQUAD rgb;
-
-                    rgb.rgbBlue = pixel[0];
-                    rgb.rgbGreen = pixel[1];
-                    rgb.rgbRed = pixel[0];
-                    rgb.rgbReserved = 0;*/
-
-                    _composition.setPixel(x, y, /*rgb*/layer.getFillColor());
+                    _composition.setPixel(x, y, layer.getFillColor());
                 }
             }
         }
