@@ -14,6 +14,7 @@ add_executable(
     ${SRC_PATH}/img_wnd.cpp
     ${SRC_PATH}/generic_wnd.cpp
     ${SRC_PATH}/layer_props_wnd.cpp
+    ${SRC_PATH}/json_lite.cpp
     ${SRC_PATH}/main.rc
 )
 

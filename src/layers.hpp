@@ -36,6 +36,13 @@ class Layers {
 
         void compose();
 
+        bool loadProject(const char *file);
+
+        auto& begin() { return _container.begin(); }
+        auto& end() { return _container.end(); }
+        auto& cbegin() { return _container.cbegin(); }
+        auto& cend() { return _container.cend(); }
+
     private:
         std::vector<Layer> _container;
         Layer _composition;

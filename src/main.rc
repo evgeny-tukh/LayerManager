@@ -5,9 +5,9 @@ ID_MAINMENU MENU
 {
     POPUP "&File"
     {
-        MENUITEM "&Open...", ID_OPEN
-        MENUITEM "&Save...", ID_SAVE
-        MENUITEM "&Save as...", ID_SAVEAS
+        MENUITEM "&Open project...", ID_OPEN
+        MENUITEM "&Save project...", ID_SAVE
+        MENUITEM "&Save project as...", ID_SAVEAS
         MENUITEM SEPARATOR
         MENUITEM "&Generate...", ID_GENERATE
         MENUITEM SEPARATOR

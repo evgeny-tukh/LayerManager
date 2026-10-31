@@ -15,6 +15,8 @@ const char *plsConfirmText = "Please confirm";
 const char *exitAppText = "Exit app?";
 const char *layerFilters = "TIFF files (*.tiff;*.tif)\0*.tiff;*.tif\0All files\0*.*\0";
 const char *layerAddStr = "Add Layer";
+const char *openProjectStr = "Open Project";
+const char *projectFilters = "QC projects (*.qcp)\0*.qcp\0All files\0*.*\0";
 
 const int layerListWidth = 300;
 const int layerPropsHeight = 230;
@@ -115,7 +117,7 @@ bool processSysCommand(HWND wnd, WPARAM wp, LPARAM lp) {
     return false;
 }
 
-void addLayer(HWND wnd) {
+std::string getOpenFileName(HWND wnd, const char *title, const char *filter) {
     OPENFILENAMEA ofn;
     char buf[MAX_PATH];
 
@@ -126,15 +128,39 @@ void addLayer(HWND wnd) {
     ofn.hInstance = getInstanceHandle(wnd);
     ofn.hwndOwner = wnd;
     ofn.lpstrFile = buf;
-    ofn.lpstrFilter = layerFilters;
-    ofn.lpstrTitle = layerAddStr;
+    ofn.lpstrFilter = filter;
+    ofn.lpstrTitle = title;
     ofn.lStructSize = sizeof(ofn);
     ofn.nMaxFile = sizeof(buf);
 
-    if (GetOpenFileNameA(&ofn)) {
-        int item = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_ADDSTRING, 0, reinterpret_cast<WPARAM>(buf)));
+    if (GetOpenFileNameA(&ofn))
+        return buf;
+
+    return {};
+}
+
+bool openProject(HWND wnd) {
+    auto fileName = getOpenFileName(wnd, openProjectStr, projectFilters);
+
+    if (fileName.empty())
+        return false;
+
+    if (layers.loadProject(fileName.c_str())) {
+        for (size_t i = 0; i < layers.size(); ++i) {
+            static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_ADDSTRING, 0, reinterpret_cast<WPARAM>(layers[i].name().c_str())));
+        }
+    }
+
+    return true;
+}
+
+void addLayer(HWND wnd) {
+    auto fileName = getOpenFileName(wnd, layerAddStr, layerFilters);
+
+    if (!fileName.empty()) {
+        int item = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_ADDSTRING, 0, reinterpret_cast<WPARAM>(fileName.c_str())));
         selectLayerItem(wnd, item);
-        layers.addLayer(buf);
+        layers.addLayer(fileName.c_str());
         imgWnd->setSelectedLayer(item);
         layerPropsWnd->show();
         layerPropsWnd->setLayerIndex(item);
@@ -189,6 +215,12 @@ void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
             if (confirmExit(wnd))
                 DestroyWindow(wnd);
 
+            break;
+
+        case ID_OPEN:
+            if (openProject(wnd)) {
+
+            }
             break;
 
         case ID_ADD:
