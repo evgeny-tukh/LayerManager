@@ -106,16 +106,10 @@ void Layer::setTurnAngle(int angle) {
     applyTurnAngle();
 }
 
-void Layer::draw(HDC hdc) {
-    const auto& img = _showRotated ? _rotatedImg : _img;
-    const auto& pixelBuf = _showRotated ? _rotatedPixelBuffer : _pixelBuffer;
-
-    if (img.cols == 0 && img.rows == 0)
-        return;
-
+void Layer::draw(HDC hdc, const PixelBuf& pixelBuf, int x, int y, int width, int height) {
     HDC screenDC = GetDC(HWND_DESKTOP);
     HDC tempDC = CreateCompatibleDC(screenDC);
-    HBITMAP tempBmp = CreateCompatibleBitmap(screenDC, img.cols, img.rows);
+    HBITMAP tempBmp = CreateCompatibleBitmap(screenDC, width, height);
 
     ReleaseDC(HWND_DESKTOP, screenDC);
 
@@ -124,17 +118,27 @@ void Layer::draw(HDC hdc) {
     memset(&bmi, 0, sizeof(bmi));
 
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bmi.bmiHeader.biWidth = img.cols;
-    bmi.bmiHeader.biHeight = -img.rows;
+    bmi.bmiHeader.biWidth = width;
+    bmi.bmiHeader.biHeight = -height;
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 32;
     bmi.bmiHeader.biCompression = BI_RGB;
 
     SelectObject(tempDC, tempBmp);
-    SetDIBits(tempDC, tempBmp, 0, img.rows, pixelBuf.data(), &bmi, DIB_RGB_COLORS);
-    BitBlt(hdc, _xOffset, _yOffset, img.cols, img.rows, tempDC, 0, 0, SRCCOPY);
+    SetDIBits(tempDC, tempBmp, 0, height, pixelBuf.data(), &bmi, DIB_RGB_COLORS);
+    BitBlt(hdc, x, y, width, height, tempDC, 0, 0, SRCCOPY);
     DeleteObject(tempBmp);
     DeleteDC(tempDC);
+}
+
+void Layer::draw(HDC hdc) {
+    const auto& img = _showRotated ? _rotatedImg : _img;
+    const auto& pixelBuf = _showRotated ? _rotatedPixelBuffer : _pixelBuffer;
+
+    if (img.cols == 0 && img.rows == 0)
+        return;
+
+    draw(hdc, pixelBuf, _xOffset, _yOffset, img.cols, img.rows);
 }
 
 const cv::Vec3b& Layer::pixel(int x, int y, bool rotated) const {

@@ -17,6 +17,7 @@ const char *layerFilters = "TIFF files (*.tiff;*.tif)\0*.tiff;*.tif\0All files\0
 const char *layerAddStr = "Add Layer";
 const char *openProjectStr = "Open Project";
 const char *projectFilters = "QC projects (*.qcp)\0*.qcp\0All files\0*.*\0";
+const char *composition = { "Composition" };
 
 const int layerListWidth = 300;
 const int layerPropsHeight = 230;
@@ -61,7 +62,7 @@ int getSelectedLayer(HWND wnd) {
 }
 
 int getNumOfLayers(HWND wnd) {
-    return static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETCOUNT, 0, 0));
+    return static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETCOUNT, 0, 0)) - 1;
 }
 
 void paint(HWND wnd) {
@@ -77,6 +78,10 @@ void onResize(HWND wnd, unsigned width, unsigned height) {
     MoveWindow(GetDlgItem(wnd, ID_LAYERS), 0, 0, layerListWidth, height - layerPropsHeight, true);
     MoveWindow(GetDlgItem(wnd, ID_PREVIEW), layerListWidth, 0, width - layerListWidth, height, true);
     MoveWindow(GetDlgItem(wnd, ID_LAYER_PROPS), 0, height - layerPropsHeight, layerListWidth, layerPropsHeight, true);
+}
+
+void addCompositionString(HWND wnd) {
+    SendDlgItemMessageA(wnd, ID_LAYERS, LB_ADDSTRING, 0, reinterpret_cast<WPARAM>(composition));
 }
 
 void initWindow(HWND wnd) {
@@ -98,6 +103,8 @@ void initWindow(HWND wnd) {
         instance,
         nullptr
     );
+
+    addCompositionString(wnd);
 
     imgWnd = std::make_shared<ImgWnd>(instance, layers);
     layerPropsWnd = std::make_shared<LayerPropsWnd>(instance, layers);
@@ -145,26 +152,35 @@ bool openProject(HWND wnd) {
     if (fileName.empty())
         return false;
 
+    SendDlgItemMessageA(wnd, ID_LAYERS, LB_RESETCONTENT, 0, 0);
+
     if (layers.loadProject(fileName.c_str())) {
         for (size_t i = 0; i < layers.size(); ++i) {
-            static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_ADDSTRING, 0, reinterpret_cast<WPARAM>(layers[i].name().c_str())));
+            SendDlgItemMessageA(wnd, ID_LAYERS, LB_ADDSTRING, 0, reinterpret_cast<WPARAM>(layers[i].name().c_str()));
         }
     }
 
+    addCompositionString(wnd);
+
     return true;
+}
+
+void forceImageRedraw(HWND wnd) {
+    InvalidateRect(GetDlgItem(wnd, ID_PREVIEW), NULL, TRUE);
 }
 
 void addLayer(HWND wnd) {
     auto fileName = getOpenFileName(wnd, layerAddStr, layerFilters);
 
     if (!fileName.empty()) {
-        int item = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_ADDSTRING, 0, reinterpret_cast<WPARAM>(fileName.c_str())));
+        int count = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETCOUNT, 0, 0)); 
+        int item = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_INSERTSTRING, count - 1, reinterpret_cast<WPARAM>(fileName.c_str())));
         selectLayerItem(wnd, item);
         layers.addLayer(fileName.c_str());
         imgWnd->setSelectedLayer(item);
         layerPropsWnd->show();
         layerPropsWnd->setLayerIndex(item);
-        InvalidateRect(GetDlgItem(wnd, ID_PREVIEW), NULL, TRUE);
+        forceImageRedraw(wnd);
     }
 }
 
@@ -209,6 +225,22 @@ void moveLayer(HWND wnd, int direction) {
     selectLayerItem(wnd, newIndex);
 }
 
+void onSelectLayer(HWND wnd) {
+    int selection = getSelectedLayer(wnd);
+    int numOfLayers = getNumOfLayers(wnd);
+
+    if (selection == numOfLayers) {
+        layerPropsWnd->hide();
+        imgWnd->setSelectedLayer(ImgWnd::Constants::COMPOSITION);
+        forceImageRedraw(wnd);
+    } else if (selection >= 0 && selection < numOfLayers) {
+        imgWnd->setSelectedLayer(selection);
+        layerPropsWnd->show();
+        layerPropsWnd->setLayerIndex(selection);
+        forceImageRedraw(wnd);
+    }
+}
+
 void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
     switch (LOWORD(wp)) {
         case ID_EXIT:
@@ -243,20 +275,12 @@ void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
             layers.compose();
             imgWnd->setSelectedLayer(ImgWnd::COMPOSITION);
             layerPropsWnd->hide();
-            InvalidateRect(GetDlgItem(wnd, ID_PREVIEW), NULL, TRUE);
+            forceImageRedraw(wnd);
             break;
 
         case ID_LAYERS:
-            if (HIWORD(wp) == LBN_SELCHANGE) {
-                int selection = getSelectedLayer(wnd);
-
-                if (selection >= 0) {
-                    imgWnd->setSelectedLayer(selection);
-                    layerPropsWnd->show();
-                    layerPropsWnd->setLayerIndex(selection);
-                    InvalidateRect(GetDlgItem(wnd, ID_PREVIEW), NULL, TRUE);
-                }
-            }
+            if (HIWORD(wp) == LBN_SELCHANGE)
+                onSelectLayer(wnd);
 
             break;
     }

@@ -42,7 +42,7 @@ GenericWnd::GenericWnd(HINSTANCE instance, const char *clsName): _wnd(NULL), _in
 
     memset(&cls, 0, sizeof(cls));
 
-    cls.hbrBackground = GetSysColorBrush(COLOR_3DFACE); //reinterpret_cast<HBRUSH>(GetStockObject(WHITE_BRUSH));
+    cls.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
     cls.hCursor = LoadCursor(instance, IDC_ARROW);
     cls.hIcon = LoadIcon(instance, IDI_APPLICATION);
     cls.hInstance = instance;

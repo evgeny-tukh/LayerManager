@@ -24,6 +24,7 @@ class Layer {
         ~Layer();
 
         void draw(HDC hdc);
+        static void draw(HDC hdc, const PixelBuf& pixelBuf, int x, int y, int width, int height);
 
         const std::string& name() const { return _imgFile; }
         const cv::Mat& image() const { return _img; }

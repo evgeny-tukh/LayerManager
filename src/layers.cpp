@@ -43,6 +43,9 @@ bool loadTiff(const char *file) {
     return true;
 }
 
+Layers::Layers(): _compositionWidth(0), _compositionHeight(0) {
+}
+
 void Layers::addLayer(const char *file) {
     _container.emplace_back(file);
 }
@@ -141,27 +144,35 @@ void Layers::drawAt(HWND wnd, size_t index) {
 }
 
 void Layers::compose() {
-    int maxWidth = 0;
-    int maxHeight = 0;
+    _compositionWidth = 0;
+    _compositionHeight = 0;
 
     for (const auto& layer: _container) {
-        if (layer.width() > maxWidth)
-            maxWidth = static_cast<int>(layer.width());
+        if (layer.width() > _compositionWidth)
+            _compositionWidth = static_cast<int>(layer.width());
 
-        if (layer.height() > maxHeight)
-            maxHeight = static_cast<int>(layer.height());
+        if (layer.height() > _compositionHeight)
+            _compositionHeight = static_cast<int>(layer.height());
     }
 
-    _composition.setSize(maxWidth, maxHeight, transpColor);
+    _composition.resize(_compositionWidth * _compositionHeight);
 
-    for (int x = 0; x < maxWidth; ++x) {
-        for (int y = 0; y < maxWidth; ++y) {
+    for (int x = 0; x < _compositionWidth; ++x) {
+        for (int y = 0; y < _compositionHeight; ++y) {
+            size_t index = x + y * _compositionWidth;
+                    
             for (auto& layer: _container) {
+                int srcX = x - layer.xOffset();
+                int srcY = y - layer.yOffset();
+
+                if (srcX < 0 || srcX >= layer.width() || srcY < 0 || srcY >= layer.height())
+                    continue;
+
                 bool useRotation = layer.getTurnAngle() != 0;
-                auto pix = layer.getRgbQuad(x, y, useRotation);
+                auto pix = layer.getRgbQuad(srcX, srcY, useRotation);
 
                 if (transpColor.rgbBlue != pix.rgbBlue || transpColor.rgbGreen != pix.rgbGreen || transpColor.rgbRed != pix.rgbRed)
-                    _composition.setPixel(x + layer.xOffset(), y + layer.yOffset(), layer.getFillColor());
+                    _composition[index] = layer.getFillColor();
             }
         }
     }
@@ -224,4 +235,8 @@ bool Layers::loadProject(const char *file) {
     delete json;
 
     return true;
+}
+
+void Layers::drawComposition(HDC hdc) {
+    Layer::draw(hdc, _composition, 0, 0, _compositionWidth, _compositionHeight);
 }

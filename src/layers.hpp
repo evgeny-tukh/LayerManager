@@ -10,7 +10,7 @@
 
 class Layers {
     public:
-        Layers() {}
+        Layers();
 
         void addLayer(const char *file);
 
@@ -32,8 +32,6 @@ class Layers {
 
         Layer& operator[](size_t index) { return _container[index]; }
 
-        Layer& composition() { return _composition; }
-
         void compose();
 
         bool loadProject(const char *file);
@@ -43,9 +41,18 @@ class Layers {
         auto& cbegin() { return _container.cbegin(); }
         auto& cend() { return _container.cend(); }
 
+        const RGBQUAD *composition() const { return _composition.data(); }
+        int compositionWidth() const { return _compositionWidth; }
+        int compositionHeight() const { return _compositionHeight; }
+
+        void drawComposition(HDC hdc);
+        bool hasComposition() { return !_composition.empty(); }
+
     private:
         std::vector<Layer> _container;
-        Layer _composition;
+        Layer::PixelBuf _composition;
+        int _compositionWidth;
+        int _compositionHeight;
 };
 
 bool loadTiff(const char *file);
