@@ -25,7 +25,8 @@
 #define ID_BLUE         1106
 #define ID_COLOR_BOX    1107
 #define ID_SELECT_COLOR 1108
-#define ID_APPLY        1109
+#define ID_SHOW_ROTATED 1109
+#define ID_APPLY        1110
 
 #define ID_LAYERS       2000
 #define ID_PREVIEW      2001

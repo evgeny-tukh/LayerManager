@@ -100,7 +100,8 @@ void LayerPropsWnd::onCreate(HWND wnd, WPARAM wp, LPARAM lp) {
 
     createImage(ID_COLOR_BOX, 150, 100, 80, 80);
     createButton(ID_SELECT_COLOR, 240, 100, 50, 80, "...");
-    createButton(ID_APPLY, 150, 190, 140, 30, "Apply...");
+    createButton(ID_SHOW_ROTATED, 10, 190, 135, 30, "Show rotated", BS_CHECKBOX|BS_AUTOCHECKBOX|BS_PUSHLIKE);
+    createButton(ID_APPLY, 155, 190, 135, 30, "Apply...");
 
     showColor();
 }

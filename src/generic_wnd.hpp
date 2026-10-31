@@ -3,8 +3,10 @@
 #include <Windows.h>
 
 #include <string>
+#include <cstdint>
 
 #include "layers.hpp"
+#include "resource.h"
 
 class GenericWnd {
     public:
@@ -35,8 +37,10 @@ class GenericWnd {
     protected:
         GenericWnd *getSelf() const;
 
+        HWND createChild(const char *clsName, int x, int y, int width, int height, uint64_t id = IDC_STATIC, const char *text = "", unsigned int style = 0) const;
+
         void createLabel(const char *text, int x, int y, int width, int height) const;
         HWND createImage(uint64_t id, int x, int y, int width, int height) const;
         HWND createEditor(uint64_t id, int x, int y, int width, int height, const char *text = "") const;
-        HWND createButton(uint64_t id, int x, int y, int width, int height, const char *text = "") const;
+        HWND createButton(uint64_t id, int x, int y, int width, int height, const char *text = "", unsigned int = BS_PUSHBUTTON) const;
 };
