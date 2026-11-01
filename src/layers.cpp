@@ -240,3 +240,6 @@ bool Layers::loadProject(const char *file) {
 void Layers::drawComposition(HDC hdc) {
     Layer::draw(hdc, _composition, 0, 0, _compositionWidth, _compositionHeight);
 }
+
+void Layers::compose2() {
+}

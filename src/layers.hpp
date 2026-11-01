@@ -33,6 +33,7 @@ class Layers {
         Layer& operator[](size_t index) { return _container[index]; }
 
         void compose();
+        void compose2();
 
         bool loadProject(const char *file);
 

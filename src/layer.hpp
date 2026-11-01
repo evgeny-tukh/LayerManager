@@ -66,4 +66,7 @@ class Layer {
         PixelBuf _pixelBuffer;
         PixelBuf _rotatedPixelBuffer;
         bool _showRotated;
+
+    private:
+        void initImage(const char *image);
 };

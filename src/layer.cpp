@@ -8,6 +8,48 @@ namespace {
 const cv::Vec3b emptyPixel { 0, 0, 0 };
 const RGBQUAD defFill { 127, 127, 127, 0 };
 
+int convertToRgba(cv::Mat& img) {
+    cv::Mat continuousImg;
+    if (!img.isContinuous()) {
+        continuousImg = img.clone();
+    } else {
+        continuousImg = img;
+    }
+
+    cv::flip(continuousImg, img, 0);
+    
+    return img.channels();
+}
+
+int convertToRgbaWithTransparentColor(cv::Mat& img, cv::Scalar transparentColor) {
+    int ch = 0;
+    if (img.channels() != 3) {
+        img = img.clone();
+        ch = img.channels();
+    }
+
+    // Create the mask based on the transparent color
+    cv::Mat mask;
+    cv::inRange(img, transparentColor, transparentColor, mask);
+
+    // Invert the mask
+    cv::Mat alpha;
+    cv::bitwise_not(mask, alpha);
+
+    // Split color channels
+    std::vector<cv::Mat> bgrChannels;
+    cv::split(img, bgrChannels);
+
+    // Append alpha channel
+    bgrChannels.push_back(alpha);
+
+    // Merge channels back
+    cv::merge(bgrChannels, img);
+    ch = img.channels();
+
+    return img.channels();
+}
+
 const cv::Vec3b& pixel(const cv::Mat& img, int x, int y) {
     if (img.empty())
         return emptyPixel;
@@ -19,8 +61,11 @@ uint8_t *pixelDirect(const cv::Mat& img, int x, int y) {
     return img.data + (y * img.step.p[0] + x * 3);
 }
 
-void populatePixelBuffer(const cv::Mat& img, Layer::PixelBuf& pixelBuffer) {
+void populatePixelBuffer(const cv::Mat& img, Layer::PixelBuf& pixelBuffer, int channels = 3) {
     pixelBuffer.resize(img.cols * img.rows);
+
+    memcpy(pixelBuffer.data(), img.data, pixelBuffer.size() * sizeof(RGBQUAD));
+    return;
 
     for (int y = 0; y < img.rows - 5; ++y) {
         const uchar *line = img.data + (y * img.step.p[0]);
@@ -62,16 +107,21 @@ void rotate(const cv::Mat& src, cv::Mat& dest, int angle) {
 
 }
 
-Layer::Layer(const char *imgFile): _imgFile(imgFile), _xOffset(0), _yOffset(0), _turnAngle(0), _fillColor(defFill), _showRotated(false) {
-    _img = cv::imread(imgFile, cv::IMREAD_UNCHANGED);
+void Layer::initImage(const char *imgFile) {
+    _img = cv::imread(imgFile, cv::IMREAD_COLOR);
 
     if (_img.empty()) 
         return;
         
-    populatePixelBuffer(_img, _pixelBuffer);
+    cv::Scalar transpColor { 255, 255, 255 };
+    int channels = convertToRgbaWithTransparentColor(_img, transpColor);
+    populatePixelBuffer(_img, _pixelBuffer, channels);
 
     if (_turnAngle != 0)
         applyTurnAngle();
+}
+
+Layer::Layer(const char *imgFile): Layer(imgFile, 0, 0, defFill, 0) {
 }
 
 Layer::Layer(
@@ -81,15 +131,7 @@ Layer::Layer(
     RGBQUAD fillColor,
     int turnAngle
 ): _imgFile(imgFile), _xOffset(xOffset), _yOffset(yOffset), _fillColor(fillColor), _turnAngle(turnAngle), _showRotated(false) {
-    _img = cv::imread(imgFile, cv::IMREAD_UNCHANGED);
-
-    if (_img.empty()) 
-        return;
-        
-    populatePixelBuffer(_img, _pixelBuffer);
-
-    if (_turnAngle != 0)
-        applyTurnAngle();
+    initImage(imgFile);
 }
 
 Layer::~Layer() {

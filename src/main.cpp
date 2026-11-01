@@ -13,7 +13,7 @@ namespace {
 const char *mainWndName = "Layer Manager v1";
 const char *plsConfirmText = "Please confirm";
 const char *exitAppText = "Exit app?";
-const char *layerFilters = "TIFF files (*.tiff;*.tif)\0*.tiff;*.tif\0All files\0*.*\0";
+const char *layerFilters = "TIFF files (*.tiff;*.tif)\0*.tiff;*.tif\0PNG files (*.png)\0*.png\0All files\0*.*\0";
 const char *layerAddStr = "Add Layer";
 const char *openProjectStr = "Open Project";
 const char *projectFilters = "QC projects (*.qcp)\0*.qcp\0All files\0*.*\0";
@@ -26,6 +26,31 @@ Layers layers;
 
 std::shared_ptr<ImgWnd> imgWnd;
 std::shared_ptr<LayerPropsWnd> layerPropsWnd;
+
+using FilterItem = std::pair<std::string, std::string>;
+using FilterList = std::vector<FilterItem>;
+
+const FilterList layersFilter {
+    { "TIFF files (*.tiff;*.tif)", "*.tiff;*.tif" },
+    { "PNG files (*.png)", "*.png" },
+    { "All files", "*.*" },
+};
+
+const FilterList projectFilter {
+    { "QC projects (*.qcp)", "*.qcp" },
+    { "All files", "*.*" },
+};
+
+std::string buildFilter(const FilterList& filterList) {
+    std::stringstream ss;
+
+    for (const auto& item: filterList)
+        ss << item.first << '\0' << item.second << '\0';
+    
+    ss << '\0';
+
+    return ss.str();
+}
 
 HINSTANCE getInstanceHandle(HWND wnd) {
     return reinterpret_cast<HINSTANCE>(GetWindowLongPtr(wnd, GWLP_HINSTANCE));
@@ -124,8 +149,9 @@ bool processSysCommand(HWND wnd, WPARAM wp, LPARAM lp) {
     return false;
 }
 
-std::string getOpenFileName(HWND wnd, const char *title, const char *filter) {
+std::string getOpenFileName(HWND wnd, const char *title, const FilterList& filterList) {
     OPENFILENAMEA ofn;
+    const auto filter = buildFilter(filterList);
     char buf[MAX_PATH];
 
     memset(&ofn, 0, sizeof(ofn));
@@ -135,7 +161,7 @@ std::string getOpenFileName(HWND wnd, const char *title, const char *filter) {
     ofn.hInstance = getInstanceHandle(wnd);
     ofn.hwndOwner = wnd;
     ofn.lpstrFile = buf;
-    ofn.lpstrFilter = filter;
+    ofn.lpstrFilter = filter.data();
     ofn.lpstrTitle = title;
     ofn.lStructSize = sizeof(ofn);
     ofn.nMaxFile = sizeof(buf);
@@ -147,7 +173,7 @@ std::string getOpenFileName(HWND wnd, const char *title, const char *filter) {
 }
 
 bool openProject(HWND wnd) {
-    auto fileName = getOpenFileName(wnd, openProjectStr, projectFilters);
+    auto fileName = getOpenFileName(wnd, openProjectStr, projectFilter);
 
     if (fileName.empty())
         return false;
@@ -170,7 +196,7 @@ void forceImageRedraw(HWND wnd) {
 }
 
 void addLayer(HWND wnd) {
-    auto fileName = getOpenFileName(wnd, layerAddStr, layerFilters);
+    auto fileName = getOpenFileName(wnd, layerAddStr, layersFilter);
 
     if (!fileName.empty()) {
         int count = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETCOUNT, 0, 0)); 
