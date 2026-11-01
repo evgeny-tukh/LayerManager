@@ -143,7 +143,7 @@ void Layers::drawAt(HWND wnd, size_t index) {
     ReleaseDC(wnd, ctx);
 }
 
-void Layers::compose() {
+void Layers::findMaxDims() {
     _compositionWidth = 0;
     _compositionHeight = 0;
 
@@ -156,6 +156,10 @@ void Layers::compose() {
     }
 
     _composition.resize(_compositionWidth * _compositionHeight);
+}
+
+void Layers::compose() {
+    findMaxDims();
 
     for (int x = 0; x < _compositionWidth; ++x) {
         for (int y = 0; y < _compositionHeight; ++y) {
@@ -242,4 +246,26 @@ void Layers::drawComposition(HDC hdc) {
 }
 
 void Layers::compose2() {
+    findMaxDims();
+
+    // Base layer
+    cv::Mat canvas = _container[0].image().clone();
+
+    // Iterate other layers
+    const cv::Scalar& transparentColor { 255, 255, 255 };
+    for (size_t i = 1; i < _container.size(); ++i) {
+        const auto& layer = _container[i].image();
+
+        cv::Mat transparentMask;
+        cv::inRange(layer, transparentColor, transparentColor, transparentMask);
+
+        cv::Mat opaqueMask;
+        cv::bitwise_not(transparentMask, opaqueMask);
+
+        layer.copyTo(canvas, opaqueMask);
+    }
+
+    _composition.resize(_compositionWidth * _compositionHeight);
+
+    memcpy(_composition.data(), canvas.data, _composition.size() * sizeof(RGBQUAD));
 }

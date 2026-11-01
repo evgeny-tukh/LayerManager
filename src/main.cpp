@@ -298,7 +298,7 @@ void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
             break;
 
         case ID_COMPOSE:
-            layers.compose();
+            layers.compose2();
             imgWnd->setSelectedLayer(ImgWnd::COMPOSITION);
             layerPropsWnd->hide();
             forceImageRedraw(wnd);

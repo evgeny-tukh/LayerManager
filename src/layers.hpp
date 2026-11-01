@@ -54,6 +54,9 @@ class Layers {
         Layer::PixelBuf _composition;
         int _compositionWidth;
         int _compositionHeight;
+
+    private:
+        void findMaxDims();
 };
 
 bool loadTiff(const char *file);
