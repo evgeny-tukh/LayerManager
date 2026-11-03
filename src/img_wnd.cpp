@@ -3,6 +3,7 @@
 
 namespace {
 const char *clsName = "LMPreviewWnd";
+const int pageSize = 100;
 }
 
 bool ImgWnd::processMessage(HWND wnd, UINT msg, WPARAM wp, LPARAM lp) {
@@ -15,10 +16,20 @@ bool ImgWnd::processMessage(HWND wnd, UINT msg, WPARAM wp, LPARAM lp) {
         return true;
     }
 
+    if (msg == WM_VSCROLL) {
+        verticalScroll(LOWORD(wp), HIWORD(wp));
+        return true;
+    }
+
+    if (msg == WM_HSCROLL) {
+        horizontalScroll(LOWORD(wp), HIWORD(wp));
+        return true;
+    }
+
     return false;
 }
 
-ImgWnd::ImgWnd(HINSTANCE instance, Layers& layers): GenericWnd(instance, clsName), _selectedLayer(-1), _layers(layers) {
+ImgWnd::ImgWnd(HINSTANCE instance, Layers& layers): GenericWnd(instance, clsName), _selectedLayer(-1), _layers(layers), _startX(0), _startY(0) {
 }
 
 void ImgWnd::paint() {
@@ -27,13 +38,101 @@ void ImgWnd::paint() {
 
     if (_selectedLayer == COMPOSITION) {
         if (_layers.hasComposition()) {
-            _layers.drawComposition(paintDC);
+            _layers.drawComposition(paintDC, _startX, _startY);
         } else {
             FillRect(paintDC, &ps.rcPaint, GetSysColorBrush(COLOR_3DFACE));
         }
     } else if (_selectedLayer >= 0 && _selectedLayer < _layers.size()) {
-        _layers[_selectedLayer].draw(paintDC);
+        _layers[_selectedLayer].draw(paintDC, _startX, _startY);
     }
 
     EndPaint(_wnd, &ps);
+}
+
+
+void ImgWnd::setScrollInfo(int cmd, int pos, int max) {
+    SCROLLINFO si;
+
+    memset(&si, 0, sizeof(si));
+
+    si.cbSize = sizeof(si);
+    si.fMask = SIF_POS|SIF_RANGE;
+    si.nMax = max;
+    si.nPos = pos;
+
+    SetScrollInfo(_wnd, cmd, &si, true);
+}
+
+void ImgWnd::configureScroll(int maxX, int maxY) {
+    setScrollInfo(SB_HORZ, _startX, maxX);
+    setScrollInfo(SB_VERT, _startY, maxY);
+}
+
+void ImgWnd::setSelectedLayer(int layer) {
+    _selectedLayer = layer;
+    _startX = 0;
+    _startY = 0;
+
+    if (layer == COMPOSITION) {
+        _maxX = _layers.compositionWidth();
+        _maxY = _layers.compositionHeight();
+    } else {
+        const auto& img = _layers[_selectedLayer].image();
+
+        _maxX = img.cols;
+        _maxY = img.rows;
+    }
+
+    RECT client;
+    getClientRect(client);
+
+    configureScroll(_maxX - client.right, _maxY - client.bottom);
+}
+
+void ImgWnd::verticalScroll(int cmd, int value) {
+    switch (cmd) {
+        case SB_THUMBPOSITION:
+            _startY = value;
+            break;
+        case SB_TOP:
+            _startY = 0;
+            break;
+        case SB_LINEDOWN:
+            if (_startY < _maxY)
+                ++_startY;
+            break;
+        case SB_LINEUP:
+            if (_startY > 0)
+                --_startY;
+            break;
+        case SB_PAGEDOWN:
+            _startY += pageSize;
+            if (_startY > _maxY)
+                _startY = _maxY;
+            break;
+        case SB_PAGEUP:
+            _startY -= pageSize;
+            if (_startY < 0)
+                _startY = 0;
+            break;
+        default:
+            return;
+    }
+
+    SCROLLINFO si;
+    memset(&si, 0, sizeof(si));
+    si.cbSize = sizeof(si);
+    si.fMask = SIF_POS;
+    si.nPos = _startY;
+    SetScrollInfo(_wnd, SB_VERT, &si, TRUE);
+    InvalidateRect(_wnd, NULL, TRUE);
+}
+
+void ImgWnd::horizontalScroll(int cmd, int value) {
+
+}
+
+
+void ImgWnd::onSize(int width, int height) {
+    configureScroll(_maxX - width, _maxY - height);
 }

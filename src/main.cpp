@@ -92,15 +92,6 @@ int getNumOfLayers(HWND wnd) {
     return static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETCOUNT, 0, 0)) - 1;
 }
 
-void paint(HWND wnd) {
-    PAINTSTRUCT ps;
-    HDC paintDC = BeginPaint(wnd, &ps);
-    int selection = getSelectedLayer(wnd);
-    if (selection >= 0)
-        layers.drawAtFast(wnd, selection);
-    EndPaint(wnd, &ps);
-}
-
 void onResize(HWND wnd, unsigned width, unsigned height) {
     RECT statusBarClient;
     statusBar->getWindowRect(statusBarClient);
@@ -141,7 +132,7 @@ void initWindow(HWND wnd) {
     addCompositionString(wnd);
 
     imgWnd = std::make_shared<ImgWnd>(instance, layers);
-    imgWnd->create(wnd, ID_PREVIEW, layerListWidth, 0, client.right - layerListWidth, client.bottom);
+    imgWnd->create(wnd, ID_PREVIEW, layerListWidth, 0, client.right - layerListWidth, client.bottom, true, WS_HSCROLL|WS_VSCROLL);
 
     layerPropsWnd = std::make_shared<LayerPropsWnd>(instance, layers);
     layerPropsWnd->create(wnd, ID_LAYER_PROPS, 0, client.bottom - layerPropsHeight, layerListWidth, layerPropsHeight, false);
@@ -372,10 +363,6 @@ LRESULT wndProc(HWND wnd, UINT msg, WPARAM wp, LPARAM lp) {
         case WM_CREATE:
             initWindow(wnd);
             return 1;
-
-        case WM_PAINT:
-            paint(wnd);
-            return 0;
     }
 
     return DefWindowProcA(wnd, msg, wp, lp);

@@ -24,11 +24,6 @@ class Layers {
         const size_t width(size_t index) const;
         const size_t height(size_t index) const;
 
-        void drawAt(HDC ctx, size_t index);
-        void drawAt(HWND wnd, size_t index);
-
-        void drawAtFast(HWND wnd, size_t index);
-
         size_t size() const { return _container.size(); }
 
         void erase(size_t index);
@@ -50,7 +45,7 @@ class Layers {
         int compositionWidth() const { return _compositionWidth; }
         int compositionHeight() const { return _compositionHeight; }
 
-        void drawComposition(HDC hdc);
+        void drawComposition(HDC hdc, int x, int y);
         bool hasComposition() { return !_composition.empty(); }
 
     private:

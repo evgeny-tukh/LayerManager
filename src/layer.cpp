@@ -90,9 +90,9 @@ RGBQUAD getRgbQuad(const Layer::PixelBuf& pixelBuffer, int width, int x, int y) 
 }
 
 void rotate(const cv::Mat& src, cv::Mat& dest, int angle) {
-    double turn = -angle;
-    double centerX = src.cols * 0.5;
-    double centerY = src.rows * 0.5;
+    float turn = static_cast<float>(-angle);
+    float centerX = src.cols * 0.5f;
+    float centerY = src.rows * 0.5f;
     cv::Point2f center(centerX, centerY);
     cv::Mat rotationMatrix = cv::getRotationMatrix2D(center, turn, 1.0);
     std::stringstream ss;
@@ -173,14 +173,14 @@ void Layer::draw(HDC hdc, const PixelBuf& pixelBuf, int x, int y, int width, int
     DeleteDC(tempDC);
 }
 
-void Layer::draw(HDC hdc) {
+void Layer::draw(HDC hdc, int x, int y) {
     const auto& img = _showRotated ? _rotatedImg : _img;
     const auto& pixelBuf = _showRotated ? _rotatedPixelBuffer : _pixelBuffer;
 
     if (img.cols == 0 && img.rows == 0)
         return;
 
-    draw(hdc, pixelBuf, _xOffset, _yOffset, img.cols, img.rows);
+    draw(hdc, pixelBuf, _xOffset - x, _yOffset - y, img.cols, img.rows);
 }
 
 const cv::Vec3b& Layer::pixel(int x, int y, bool rotated) const {

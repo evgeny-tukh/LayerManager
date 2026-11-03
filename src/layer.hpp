@@ -23,7 +23,7 @@ class Layer {
 
         ~Layer();
 
-        void draw(HDC hdc);
+        void draw(HDC hdc, int x, int y);
         static void draw(HDC hdc, const PixelBuf& pixelBuf, int x, int y, int width, int height);
 
         const std::string& name() const { return _imgFile; }

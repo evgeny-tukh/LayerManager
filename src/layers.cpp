@@ -85,64 +85,6 @@ const size_t Layers::height(size_t index) const {
     return _container[index].height();
 }
 
-void Layers::drawAt(HDC ctx, size_t index) {
-    if (index < _container.size())
-        _container[index].draw(ctx);
-}
-
-void Layers::drawAtFast(HWND wnd, size_t index) {
-    #if 0
-    HDC ctx = GetDC(wnd);
-    auto image = image(index);
-    RECT client;
-
-    GetClientRect(wnd, &client);
-
-    if (!image.has_value())
-        return;
-
-    cv::Mat& img = image.value();
-
-    int width = img.cols;
-    int height = img.rows;
-
-    std::vector<uint32_t> raster(width * height);
-
-    for (int y = 0, index = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x, ++index) {
-            cv::Vec3b& pixel = img.at<cv::Vec3b>(y, x);
-
-            auto blue = pixel[0];
-            auto green = pixel[1];
-            auto red = pixel[2];
-
-            raster[index] = RGB(red, green, blue);
-        }
-    }
-
-    BITMAPINFO bmi;
-    memset(&bmi, 0, sizeof(bmi));
-    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bmi.bmiHeader.biWidth = width;
-    bmi.bmiHeader.biHeight = -height;
-    bmi.bmiHeader.biPlanes = 1;
-    bmi.bmiHeader.biBitCount = 32;
-    bmi.bmiHeader.biCompression = BI_RGB;
-    bmi.bmiHeader.biSizeImage = static_cast<DWORD>(img.total() * img.elemSize());
-
-    SetDIBitsToDevice(ctx, 0, 0, width, height, 0, 0, 0, height, raster.data(), &bmi, DIB_RGB_COLORS);
-    ReleaseDC(wnd, ctx);
-    #endif
-}
-
-void Layers::drawAt(HWND wnd, size_t index) {
-    auto ctx = GetDC(wnd);
-    
-    drawAt(ctx, index);
-
-    ReleaseDC(wnd, ctx);
-}
-
 void Layers::findMaxDims() {
     _compositionWidth = 0;
     _compositionHeight = 0;
@@ -249,8 +191,8 @@ bool Layers::loadProject(const char *file, Cb cb) {
     return true;
 }
 
-void Layers::drawComposition(HDC hdc) {
-    Layer::draw(hdc, _composition, 0, 0, _compositionWidth, _compositionHeight);
+void Layers::drawComposition(HDC hdc, int x, int y) {
+    Layer::draw(hdc, _composition, -x, -y, _compositionWidth, _compositionHeight);
 }
 
 void Layers::compose2(Cb cb) {
