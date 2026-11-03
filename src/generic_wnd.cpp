@@ -37,21 +37,23 @@ LRESULT wndProc(HWND wnd, UINT msg, WPARAM wp, LPARAM lp) {
 
 }
 
-GenericWnd::GenericWnd(HINSTANCE instance, const char *clsName): _wnd(NULL), _instance(instance), _clsName(clsName) {
-    WNDCLASSA cls;
+GenericWnd::GenericWnd(HINSTANCE instance, const char *clsName, bool registerClass): _wnd(NULL), _instance(instance), _clsName(clsName), _id(0) {
+    if (registerClass) {
+        WNDCLASSA cls;
 
-    memset(&cls, 0, sizeof(cls));
+        memset(&cls, 0, sizeof(cls));
 
-    cls.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
-    cls.hCursor = LoadCursor(instance, IDC_ARROW);
-    cls.hIcon = LoadIcon(instance, IDI_APPLICATION);
-    cls.hInstance = instance;
-    cls.lpfnWndProc = wndProc;
-    cls.lpszClassName = clsName;
-    cls.lpszMenuName = nullptr;
-    cls.style = CS_VREDRAW | CS_HREDRAW;
+        cls.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
+        cls.hCursor = LoadCursor(instance, IDC_ARROW);
+        cls.hIcon = LoadIcon(instance, IDI_APPLICATION);
+        cls.hInstance = instance;
+        cls.lpfnWndProc = wndProc;
+        cls.lpszClassName = clsName;
+        cls.lpszMenuName = nullptr;
+        cls.style = CS_VREDRAW | CS_HREDRAW;
 
-    RegisterClassA(&cls);
+        RegisterClassA(&cls);
+    }
 }
 
 GenericWnd *GenericWnd::getSelf() const {
@@ -62,8 +64,9 @@ GenericWnd *GenericWnd::getSelf(HWND wnd) {
     return reinterpret_cast<ImgWnd *>(GetWindowLongPtr(wnd, GWLP_USERDATA));
 }
 
-void GenericWnd::create(HWND parent, uint64_t id, int x, int y, int width, int height, bool visible) {
-    _wnd = CreateWindowA(_clsName.c_str(), "", WS_CHILD|WS_BORDER, x, y, width, height, parent, reinterpret_cast<HMENU>(id), _instance, this);
+void GenericWnd::create(HWND parent, uint64_t id, int x, int y, int width, int height, bool visible, unsigned int extraStyles) {
+    _id = id;
+    _wnd = CreateWindowA(_clsName.c_str(), "", WS_CHILD|WS_BORDER|extraStyles, x, y, width, height, parent, reinterpret_cast<HMENU>(id), _instance, this);
 
     if (visible) {
         ShowWindow(_wnd, SW_SHOW);
@@ -102,4 +105,8 @@ void GenericWnd::show() const {
 
 void GenericWnd::hide() const {
     ShowWindow(_wnd, SW_HIDE);
+}
+
+LRESULT GenericWnd::sendMsg(UINT msg, WPARAM wp, LPARAM lp) {
+    return SendMessage(_wnd, msg, wp, lp);
 }

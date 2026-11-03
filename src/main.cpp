@@ -8,6 +8,7 @@
 #include "layers.hpp"
 #include "img_wnd.hpp"
 #include "layer_props_wnd.hpp"
+#include "status_bar.hpp"
 
 namespace {
 const char *mainWndName = "Layer Manager v1";
@@ -26,6 +27,7 @@ Layers layers;
 
 std::shared_ptr<ImgWnd> imgWnd;
 std::shared_ptr<LayerPropsWnd> layerPropsWnd;
+std::shared_ptr<StatusBar> statusBar;
 
 using FilterItem = std::pair<std::string, std::string>;
 using FilterList = std::vector<FilterItem>;
@@ -100,9 +102,16 @@ void paint(HWND wnd) {
 }
 
 void onResize(HWND wnd, unsigned width, unsigned height) {
+    RECT statusBarClient;
+    statusBar->getWindowRect(statusBarClient);
+
+    height -= statusBarClient.bottom - statusBarClient.top;
+
     MoveWindow(GetDlgItem(wnd, ID_LAYERS), 0, 0, layerListWidth, height - layerPropsHeight, true);
     MoveWindow(GetDlgItem(wnd, ID_PREVIEW), layerListWidth, 0, width - layerListWidth, height, true);
     MoveWindow(GetDlgItem(wnd, ID_LAYER_PROPS), 0, height - layerPropsHeight, layerListWidth, layerPropsHeight, true);
+
+    statusBar->reposition(width, height);
 }
 
 void addCompositionString(HWND wnd) {
@@ -132,10 +141,13 @@ void initWindow(HWND wnd) {
     addCompositionString(wnd);
 
     imgWnd = std::make_shared<ImgWnd>(instance, layers);
-    layerPropsWnd = std::make_shared<LayerPropsWnd>(instance, layers);
-
     imgWnd->create(wnd, ID_PREVIEW, layerListWidth, 0, client.right - layerListWidth, client.bottom);
+
+    layerPropsWnd = std::make_shared<LayerPropsWnd>(instance, layers);
     layerPropsWnd->create(wnd, ID_LAYER_PROPS, 0, client.bottom - layerPropsHeight, layerListWidth, layerPropsHeight, false);
+
+    statusBar = std::make_shared<StatusBar>(instance);
+    statusBar->create(wnd, ID_STATUS);
 }
 
 bool processSysCommand(HWND wnd, WPARAM wp, LPARAM lp) {
@@ -172,6 +184,19 @@ std::string getOpenFileName(HWND wnd, const char *title, const FilterList& filte
     return {};
 }
 
+void updateStep(HWND wnd, size_t step, size_t steps) {
+    if (step >= steps) {
+        statusBar->setText(1, "");
+        return;
+    }
+
+    std::stringstream ss;
+
+    ss << step << " of " << steps << " (" << (step * 100 / steps) << "%)";
+
+    statusBar->setText(1, ss.str().c_str());
+}
+
 bool openProject(HWND wnd) {
     auto fileName = getOpenFileName(wnd, openProjectStr, projectFilter);
 
@@ -180,13 +205,17 @@ bool openProject(HWND wnd) {
 
     SendDlgItemMessageA(wnd, ID_LAYERS, LB_RESETCONTENT, 0, 0);
 
-    if (layers.loadProject(fileName.c_str())) {
+    statusBar->setText(0, "Loading project...");
+
+    if (layers.loadProject(fileName.c_str(), [&wnd](size_t step, size_t steps) { updateStep(wnd, step, steps); })) {
         for (size_t i = 0; i < layers.size(); ++i) {
             SendDlgItemMessageA(wnd, ID_LAYERS, LB_ADDSTRING, 0, reinterpret_cast<WPARAM>(layers[i].name().c_str()));
         }
     }
 
     addCompositionString(wnd);
+
+    statusBar->setText(0, "");
 
     return true;
 }
@@ -267,6 +296,17 @@ void onSelectLayer(HWND wnd) {
     }
 }
 
+void compose(HWND wnd) {
+    statusBar->setText(0, "Composing...");
+
+    layers.compose2([&wnd](size_t step, size_t steps) { updateStep(wnd, step, steps); });
+    imgWnd->setSelectedLayer(ImgWnd::COMPOSITION);
+    layerPropsWnd->hide();
+    forceImageRedraw(wnd);
+
+    statusBar->setText(0, "");
+}
+
 void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
     switch (LOWORD(wp)) {
         case ID_EXIT:
@@ -298,10 +338,7 @@ void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
             break;
 
         case ID_COMPOSE:
-            layers.compose2();
-            imgWnd->setSelectedLayer(ImgWnd::COMPOSITION);
-            layerPropsWnd->hide();
-            forceImageRedraw(wnd);
+            compose(wnd);
             break;
 
         case ID_LAYERS:

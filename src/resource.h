@@ -31,6 +31,7 @@
 #define ID_LAYERS       2000
 #define ID_PREVIEW      2001
 #define ID_LAYER_PROPS  2002
+#define ID_STATUS       2003
 
 
 

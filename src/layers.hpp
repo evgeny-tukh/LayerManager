@@ -5,10 +5,14 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <functional>
 
 #include "layer.hpp"
 
 class Layers {
+    public:
+        using Cb = std::function<void(size_t, size_t)>;
+
     public:
         Layers();
 
@@ -16,7 +20,7 @@ class Layers {
 
         const std::string& name(size_t index) const;
         const cv::Mat& image(size_t index) const;
-        const cv::Vec3b& pixel(size_t index, int x, int y) const;
+        void getPixel(size_t index, int x, int y, cv::Vec3b& result) const;
         const size_t width(size_t index) const;
         const size_t height(size_t index) const;
 
@@ -33,9 +37,9 @@ class Layers {
         Layer& operator[](size_t index) { return _container[index]; }
 
         void compose();
-        void compose2();
+        void compose2(Cb cb = {});
 
-        bool loadProject(const char *file);
+        bool loadProject(const char *file, Cb cb = {});
 
         auto& begin() { return _container.begin(); }
         auto& end() { return _container.end(); }

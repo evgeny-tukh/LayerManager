@@ -64,11 +64,11 @@ const cv::Mat& Layers::image(size_t index) const {
     return _container[index].image();
 }
 
-const cv::Vec3b& Layers::pixel(size_t index, int x, int y) const {
+void Layers::getPixel(size_t index, int x, int y, cv::Vec3b& result) const {
     if (index >= _container.size())
-        return emptyPixel;
-
-    return _container[index].image();
+        result = emptyPixel;
+    else
+        result = _container[index].image();
 }
 
 const size_t Layers::width(size_t index) const {
@@ -194,7 +194,7 @@ void Layers::swapItems(size_t index, int direction) {
         std::swap (_container[index], _container[index2]);
 }
 
-bool Layers::loadProject(const char *file) {
+bool Layers::loadProject(const char *file, Cb cb) {
     FILE *project = fopen(file, "r");
 
     if (!project)
@@ -226,7 +226,13 @@ bool Layers::loadProject(const char *file) {
 
     _container.clear();
 
+    size_t numOfSteps = layersNode->size();
+    size_t step = 0;
+
     for (auto& layerNode: *layersNode) {
+        if (cb)
+            cb(step++, numOfSteps);
+
         std::string file = json::childStringValueOr(layerNode, "file");
         int xOffset = json::childNumericValueOr(layerNode, "xOffset", 0);
         int yOffset = json::childNumericValueOr(layerNode, "yOffset", 0);
@@ -235,6 +241,8 @@ bool Layers::loadProject(const char *file) {
 
         _container.emplace_back(file.c_str(), xOffset, yOffset, fillColor, turnAngle);
     }
+
+    cb(numOfSteps, numOfSteps);
 
     delete json;
 
@@ -245,7 +253,7 @@ void Layers::drawComposition(HDC hdc) {
     Layer::draw(hdc, _composition, 0, 0, _compositionWidth, _compositionHeight);
 }
 
-void Layers::compose2() {
+void Layers::compose2(Cb cb) {
     findMaxDims();
 
     // Base layer
@@ -253,7 +261,15 @@ void Layers::compose2() {
 
     // Iterate other layers
     const cv::Scalar& transparentColor { 255, 255, 255 };
+
+    size_t numOfSteps = _container.size();
+
+    cb(0, numOfSteps);
+
     for (size_t i = 1; i < _container.size(); ++i) {
+        if (cb)
+            cb(i, numOfSteps);
+        
         const auto& layer = _container[i].image();
 
         cv::Mat transparentMask;
@@ -265,7 +281,13 @@ void Layers::compose2() {
         layer.copyTo(canvas, opaqueMask);
     }
 
+    if (cb)
+        cb(numOfSteps - 1, numOfSteps);
+
     _composition.resize(_compositionWidth * _compositionHeight);
 
     memcpy(_composition.data(), canvas.data, _composition.size() * sizeof(RGBQUAD));
+
+    if (cb)
+        cb(numOfSteps, numOfSteps);
 }
