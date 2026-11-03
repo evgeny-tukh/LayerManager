@@ -12,21 +12,15 @@ bool ImgWnd::processMessage(HWND wnd, UINT msg, WPARAM wp, LPARAM lp) {
 
         if (self)
             self->paint();
-
-        return true;
-    }
-
-    if (msg == WM_VSCROLL) {
+    } else if (msg == WM_VSCROLL) {
         verticalScroll(LOWORD(wp), HIWORD(wp));
-        return true;
-    }
-
-    if (msg == WM_HSCROLL) {
+    } else if (msg == WM_HSCROLL) {
         horizontalScroll(LOWORD(wp), HIWORD(wp));
-        return true;
+    } else {
+        return false;
     }
 
-    return false;
+    return true;
 }
 
 ImgWnd::ImgWnd(HINSTANCE instance, Layers& layers): GenericWnd(instance, clsName), _selectedLayer(-1), _layers(layers), _startX(0), _startY(0) {
@@ -92,6 +86,7 @@ void ImgWnd::setSelectedLayer(int layer) {
 void ImgWnd::verticalScroll(int cmd, int value) {
     switch (cmd) {
         case SB_THUMBPOSITION:
+        case SB_THUMBTRACK:
             _startY = value;
             break;
         case SB_TOP:
@@ -119,19 +114,52 @@ void ImgWnd::verticalScroll(int cmd, int value) {
             return;
     }
 
+    setCurScrollPos(SB_VERT, _startY);
+}
+
+void ImgWnd::horizontalScroll(int cmd, int value) {
+    switch (cmd) {
+        case SB_THUMBPOSITION:
+        case SB_THUMBTRACK:
+            _startX = value;
+            break;
+        case SB_LEFT:
+            _startX = 0;
+            break;
+        case SB_LINERIGHT:
+            if (_startX < _maxX)
+                ++_startX;
+            break;
+        case SB_LINELEFT:
+            if (_startX > 0)
+                --_startX;
+            break;
+        case SB_PAGERIGHT:
+            _startX += pageSize;
+            if (_startX > _maxX)
+                _startX = _maxX;
+            break;
+        case SB_PAGELEFT:
+            _startX -= pageSize;
+            if (_startX < 0)
+                _startX = 0;
+            break;
+        default:
+            return;
+    }
+
+    setCurScrollPos(SB_HORZ, _startX);
+}
+
+void ImgWnd::setCurScrollPos(int cmd, int value) {
     SCROLLINFO si;
     memset(&si, 0, sizeof(si));
     si.cbSize = sizeof(si);
     si.fMask = SIF_POS;
-    si.nPos = _startY;
-    SetScrollInfo(_wnd, SB_VERT, &si, TRUE);
+    si.nPos = value;
+    SetScrollInfo(_wnd, cmd, &si, TRUE);
     InvalidateRect(_wnd, NULL, TRUE);
 }
-
-void ImgWnd::horizontalScroll(int cmd, int value) {
-
-}
-
 
 void ImgWnd::onSize(int width, int height) {
     configureScroll(_maxX - width, _maxY - height);

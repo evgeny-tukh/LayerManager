@@ -37,4 +37,6 @@ class ImgWnd: public GenericWnd {
         void onSize(int width, int height);
 
         void configureScroll(int maxX, int maxY);
+
+        void setCurScrollPos(int cmd, int value);
 };
