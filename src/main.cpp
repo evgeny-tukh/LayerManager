@@ -17,8 +17,12 @@ const char *exitAppText = "Exit app?";
 const char *layerFilters = "TIFF files (*.tiff;*.tif)\0*.tiff;*.tif\0PNG files (*.png)\0*.png\0All files\0*.*\0";
 const char *layerAddStr = "Add Layer";
 const char *openProjectStr = "Open Project";
+const char *saveProjectStr { "Save Project" };
 const char *projectFilters = "QC projects (*.qcp)\0*.qcp\0All files\0*.*\0";
 const char *composition = { "Composition" };
+const char *projectLoadFail { "Project load failure" };
+const char *projectSaveFail { "Project save failure" };
+const char *error { "Error" };
 
 const int layerListWidth = 300;
 const int layerPropsHeight = 230;
@@ -175,6 +179,30 @@ std::string getOpenFileName(HWND wnd, const char *title, const FilterList& filte
     return {};
 }
 
+std::string getSaveFileName(HWND wnd, const char *title, const FilterList& filterList, const char *defExt = NULL) {
+    OPENFILENAMEA ofn;
+    const auto filter = buildFilter(filterList);
+    char buf[MAX_PATH];
+
+    memset(&ofn, 0, sizeof(ofn));
+    memset(buf, 0, sizeof(buf));
+
+    ofn.Flags = OFN_OVERWRITEPROMPT|OFN_HIDEREADONLY;
+    ofn.hInstance = getInstanceHandle(wnd);
+    ofn.hwndOwner = wnd;
+    ofn.lpstrFile = buf;
+    ofn.lpstrFilter = filter.data();
+    ofn.lpstrTitle = title;
+    ofn.lStructSize = sizeof(ofn);
+    ofn.nMaxFile = sizeof(buf);
+    ofn.lpstrDefExt = defExt;
+
+    if (GetSaveFileNameA(&ofn))
+        return buf;
+
+    return {};
+}
+
 void updateStep(HWND wnd, size_t step, size_t steps) {
     if (step >= steps) {
         statusBar->setText(1, "");
@@ -206,6 +234,19 @@ bool openProject(HWND wnd) {
 
     addCompositionString(wnd);
 
+    statusBar->setText(0, "");
+
+    return true;
+}
+
+bool saveProject(HWND wnd) {
+    auto fileName = getSaveFileName(wnd, saveProjectStr, projectFilter, ".qcp");
+
+    if (fileName.empty())
+        return false;
+
+    statusBar->setText(0, "Saving project...");
+    layers.saveProject(fileName.c_str(), [&wnd](size_t step, size_t steps) { updateStep(wnd, step, steps); });
     statusBar->setText(0, "");
 
     return true;
@@ -307,9 +348,15 @@ void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
             break;
 
         case ID_OPEN:
-            if (openProject(wnd)) {
+            if (!openProject(wnd))
+                MessageBoxA(wnd, projectLoadFail, error, MB_ICONEXCLAMATION);
+            
+            break;
 
-            }
+        case ID_SAVE:
+            if (!saveProject(wnd))
+                MessageBoxA(wnd, projectSaveFail, error, MB_ICONEXCLAMATION);
+            
             break;
 
         case ID_ADD:

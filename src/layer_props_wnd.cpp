@@ -140,9 +140,18 @@ void LayerPropsWnd::apply() {
         int offsetY = GetDlgItemInt(_wnd, ID_Y_OFFSET, NULL, TRUE);
         int turnAngle = GetDlgItemInt(_wnd, ID_ANGLE, NULL, TRUE);
 
-        layer.setFillColor(fillColor);
-        layer.setOffset(offsetX, offsetY);
-        layer.setTurnAngle(turnAngle);
+        if (
+            fillColor.rgbBlue != layer.getFillColor().rgbBlue ||
+            fillColor.rgbRed != layer.getFillColor().rgbRed ||
+            fillColor.rgbGreen != layer.getFillColor().rgbGreen
+        )
+            layer.setFillColor(fillColor);
+
+        if (offsetX != layer.xOffset() || offsetY != layer.yOffset())
+            layer.setOffset(offsetX, offsetY);
+
+        if (turnAngle != layer.getTurnAngle())
+            layer.setTurnAngle(turnAngle);
     }
 }
 

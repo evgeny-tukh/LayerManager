@@ -136,6 +136,44 @@ void Layers::swapItems(size_t index, int direction) {
         std::swap (_container[index], _container[index2]);
 }
 
+bool Layers::saveProject(const char *file, Cb cb) {
+    FILE *project = fopen(file, "w");
+    
+    if (!project)
+        return false;
+
+    json::hashNode root;
+    auto layersNode = new json::arrayNode;
+
+    root.add("layers", layersNode);
+
+    for (const auto& layer: _container) {
+        auto layerNode = new json::hashNode;
+        layersNode->add(layerNode);
+
+        auto fillColorNode = new json::hashNode;
+
+        layerNode->add("file", new json::stringNode(layer.name()));
+        layerNode->add("xOffset", new json::numberNode(layer.xOffset()));
+        layerNode->add("yOffset", new json::numberNode(layer.yOffset()));
+        layerNode->add("turnAngle", new json::numberNode(layer.getTurnAngle()));
+        layerNode->add("fillColor", fillColorNode);
+
+        const auto& fillColor = layer.getFillColor();
+
+        fillColorNode->add("red", new json::numberNode(fillColor.rgbRed));
+        fillColorNode->add("green", new json::numberNode(fillColor.rgbGreen));
+        fillColorNode->add("blue", new json::numberNode(fillColor.rgbBlue));
+    }
+
+    const auto content = json::makePretty(root.serialize());
+
+    fwrite(content.data(), 1, content.length(), project);
+    fclose(project);
+
+    return true;
+}
+
 bool Layers::loadProject(const char *file, Cb cb) {
     FILE *project = fopen(file, "r");
 

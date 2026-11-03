@@ -35,6 +35,7 @@ class Layers {
         void compose2(Cb cb = {});
 
         bool loadProject(const char *file, Cb cb = {});
+        bool saveProject(const char *file, Cb cb = {});
 
         auto& begin() { return _container.begin(); }
         auto& end() { return _container.end(); }
