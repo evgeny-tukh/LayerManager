@@ -75,3 +75,17 @@ void ImageStack::shift(int x, int y) {
 void ImageStack::tile(const std::string& file, int x, int y, int width, int height) {
 
 }
+
+void ImageStack::pushBase(Color transparent, Color fill, int width, int height) {
+    Item item;
+
+    item.oper = Operation::NoOper;
+    item.size = Size(height, width);
+    item.transparent = transparent;
+    item.image = Image(height, width, CV_8UC3, fill);
+
+    _container.push(item);
+
+    cv::imshow("Заполненное изображение", item.image);
+    cv::waitKey(0);
+}

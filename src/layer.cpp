@@ -121,6 +121,15 @@ void Layer::initImage(const char *imgFile) {
         applyTurnAngle();
 }
 
+Layer::Layer() {
+    static const Color transpColor { 255, 255, 255 };
+    static const Color fillColor { 255, 0, 0 };
+    static const int width = 100;
+    static const int height = 100;
+    
+    _stack.pushBase(transpColor, fillColor, width, height);
+}
+
 Layer::Layer(const char *imgFile): Layer(imgFile, 0, 0, defFill, 0) {
 }
 

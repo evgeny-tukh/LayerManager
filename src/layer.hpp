@@ -6,12 +6,14 @@
 #include <opencv.hpp>
 #include <Windows.h>
 
+#include "image_stack.hpp"
+
 class Layer {
     public:
         using PixelBuf = std::vector<RGBQUAD>;
 
     public:
-        Layer() {}
+        Layer();
         Layer(const char *imgFile);
         Layer(
             const char *file,
@@ -66,6 +68,7 @@ class Layer {
         PixelBuf _pixelBuffer;
         PixelBuf _rotatedPixelBuffer;
         bool _showRotated;
+        ImageStack _stack;
 
     private:
         void initImage(const char *image);

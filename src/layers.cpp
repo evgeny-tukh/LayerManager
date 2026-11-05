@@ -46,6 +46,10 @@ bool loadTiff(const char *file) {
 Layers::Layers(): _compositionWidth(0), _compositionHeight(0) {
 }
 
+void Layers::addEmptyLayer() {
+    _container.emplace_back();
+}
+
 void Layers::addLayer(const char *file) {
     _container.emplace_back(file);
 }

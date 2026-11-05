@@ -18,6 +18,8 @@ add_executable(
     ${SRC_PATH}/json_lite.cpp
     ${SRC_PATH}/image_stack.cpp
     ${SRC_PATH}/tools.cpp
+    ${SRC_PATH}/win_tools.cpp
+    ${SRC_PATH}/layer_base_props_editor.cpp
     ${SRC_PATH}/main.rc
 )
 

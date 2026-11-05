@@ -5,10 +5,12 @@
 #include <commctrl.h>
 
 #include "resource.h"
+#include "win_tools.hpp"
 #include "layers.hpp"
 #include "img_wnd.hpp"
 #include "layer_props_wnd.hpp"
 #include "status_bar.hpp"
+#include "layer_base_props_editor.hpp"
 
 namespace {
 const char *mainWndName = "Layer Manager v1";
@@ -56,10 +58,6 @@ std::string buildFilter(const FilterList& filterList) {
     ss << '\0';
 
     return ss.str();
-}
-
-HINSTANCE getInstanceHandle(HWND wnd) {
-    return reinterpret_cast<HINSTANCE>(GetWindowLongPtr(wnd, GWLP_HINSTANCE));
 }
 
 bool confirm(HWND wnd, const char *text) {
@@ -256,6 +254,13 @@ void forceImageRedraw(HWND wnd) {
     InvalidateRect(GetDlgItem(wnd, ID_PREVIEW), NULL, TRUE);
 }
 
+void addEmptyLayer(HWND wnd) {
+    LayerBaseProps props;
+    
+    if (editLayerBaseProps(wnd, props))
+        layers.addEmptyLayer();
+}
+
 void addLayer(HWND wnd) {
     auto fileName = getOpenFileName(wnd, layerAddStr, layersFilter);
 
@@ -361,6 +366,10 @@ void processCommand(HWND wnd, WPARAM wp, LPARAM lp) {
 
         case ID_ADD:
             addLayer(wnd);
+            break;
+
+        case ID_ADD_EMPTY:
+            addEmptyLayer(wnd);
             break;
 
         case ID_REMOVE:

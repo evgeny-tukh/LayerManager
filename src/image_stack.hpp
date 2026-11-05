@@ -55,6 +55,8 @@ class ImageStack {
             Image image;
         };
 
+        void pushBase(Color transparent, Color fill, int width, int height);
+
         void push(Operation oper, Param param);
         void pop() { _container.pop(); }
 

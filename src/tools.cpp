@@ -30,3 +30,5 @@ Image correctColors(Image& image, Color tranparentColor, Color nonTransparentCol
 
     return bw;
 }
+
+

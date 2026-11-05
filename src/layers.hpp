@@ -16,6 +16,7 @@ class Layers {
     public:
         Layers();
 
+        void addEmptyLayer();
         void addLayer(const char *file);
 
         const std::string& name(size_t index) const;
