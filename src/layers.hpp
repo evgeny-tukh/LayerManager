@@ -16,7 +16,7 @@ class Layers {
     public:
         Layers();
 
-        void addEmptyLayer();
+        void addEmptyLayer(const LayerBaseProps& props);
         void addLayer(const char *file);
 
         const std::string& name(size_t index) const;
@@ -43,7 +43,7 @@ class Layers {
         auto& cbegin() { return _container.cbegin(); }
         auto& cend() { return _container.cend(); }
 
-        const RGBQUAD *composition() const { return _composition.data(); }
+        const AbstractColor *composition() const { return _composition.data(); }
         int compositionWidth() const { return _compositionWidth; }
         int compositionHeight() const { return _compositionHeight; }
 
@@ -52,7 +52,7 @@ class Layers {
 
     private:
         std::vector<Layer> _container;
-        Layer::PixelBuf _composition;
+        PixelBuf _composition;
         int _compositionWidth;
         int _compositionHeight;
 

@@ -53,14 +53,17 @@ class ImageStack {
             Operation oper = Operation::NoOper;
             Param param;
             Image image;
+            PixelBuf pixelBuf;
         };
 
-        void pushBase(Color transparent, Color fill, int width, int height);
+        void pushBase(Color transparent, Color fill, int width, int height, const std::string& file = {});
+        void pushBase(const LayerBaseProps& props, const std::string& file = {});
 
         void push(Operation oper, Param param);
         void pop() { _container.pop(); }
 
-        const auto& top() { return _container.top(); }
+        auto& top() { return _container.top(); }
+        const auto& top() const { return _container.top(); }
 
         auto size() const { return _container.size(); }
 

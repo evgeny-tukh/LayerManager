@@ -6,3 +6,4 @@ HINSTANCE getInstanceHandle(HWND wnd);
 
 RGBQUAD color2rgbquad(const AbstractColor& color);
 COLORREF color2colorref(const AbstractColor& color);
+Color rgbquad2ocvcolor(const RGBQUAD& color);

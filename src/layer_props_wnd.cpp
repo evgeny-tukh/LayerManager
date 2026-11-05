@@ -128,11 +128,11 @@ void LayerPropsWnd::apply() {
     if (_selection >= 0) {
         obtainColorComponents();
 
-        RGBQUAD fillColor;
-        fillColor.rgbBlue = _blue;
-        fillColor.rgbGreen = _green;
-        fillColor.rgbRed = _red;
-        fillColor.rgbReserved = 0;
+        AbstractColor fillColor;
+        fillColor.blue = _blue;
+        fillColor.green = _green;
+        fillColor.red = _red;
+        fillColor.alpha = 0;
 
         Layer& layer = _layers[_selection];
 
@@ -140,11 +140,7 @@ void LayerPropsWnd::apply() {
         int offsetY = GetDlgItemInt(_wnd, ID_Y_OFFSET, NULL, TRUE);
         int turnAngle = GetDlgItemInt(_wnd, ID_ANGLE, NULL, TRUE);
 
-        if (
-            fillColor.rgbBlue != layer.getFillColor().rgbBlue ||
-            fillColor.rgbRed != layer.getFillColor().rgbRed ||
-            fillColor.rgbGreen != layer.getFillColor().rgbGreen
-        )
+        if (fillColor != layer.getFillColor())
             layer.setFillColor(fillColor);
 
         if (offsetX != layer.xOffset() || offsetY != layer.yOffset())
@@ -160,9 +156,9 @@ void LayerPropsWnd::setLayerIndex(int index) {
     Layer& layer = _layers[_selection];
 
     auto fillColor = layer.getFillColor();
-    _red = fillColor.rgbRed;
-    _green = fillColor.rgbGreen;
-    _blue = fillColor.rgbBlue;
+    _red = fillColor.red;
+    _green = fillColor.green;
+    _blue = fillColor.blue;
 
     int offsetX;
     int offsetY;

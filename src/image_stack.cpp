@@ -1,5 +1,6 @@
 #include <unordered_set>
 
+#include "tools.hpp"
 #include "image_stack.hpp"
 
 namespace {
@@ -76,13 +77,21 @@ void ImageStack::tile(const std::string& file, int x, int y, int width, int heig
 
 }
 
-void ImageStack::pushBase(Color transparent, Color fill, int width, int height) {
+void ImageStack::pushBase(const LayerBaseProps& props, const std::string& file) {
+    pushBase(abstractColor2color(props.transpColor), abstractColor2color(props.fillColor), props.width, props.height, file);
+}
+
+void ImageStack::pushBase(Color transparent, Color fill, int width, int height, const std::string& file) {
     Item item;
 
     item.oper = Operation::NoOper;
     item.size = Size(height, width);
     item.transparent = transparent;
-    item.image = Image(height, width, CV_8UC3, fill);
+
+    if (file.empty())
+        item.image = Image(height, width, CV_8UC3, fill);
+    else
+        item.image = cv::imread(file, cv::IMREAD_COLOR);
 
     _container.push(item);
 

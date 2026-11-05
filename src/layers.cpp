@@ -12,18 +12,18 @@ namespace {
 const std::string emptyStr;
 const cv::Mat emptyMatrix;
 const cv::Vec3b emptyPixel;
-const RGBQUAD transpColor { 255, 255, 255, 0 };
-const RGBQUAD zeroColor { 0, 0, 0, 0 };
+const AbstractColor transpColor { 255, 255, 255, 0 };
+const AbstractColor zeroColor { 0, 0, 0, 0 };
 
-RGBQUAD readColor(json::hashNode *node) {
-    RGBQUAD result;
+AbstractColor readColor(json::hashNode *node) {
+    AbstractColor result;
 
     if (!node || node == json::nothing)
         return zeroColor;
 
-    result.rgbRed = json::childNumericValueOr(node, "red", 0);
-    result.rgbGreen = json::childNumericValueOr(node, "green", 0);
-    result.rgbBlue = json::childNumericValueOr(node, "blue", 0);
+    result.red = json::childNumericValueOr(node, "red", 0);
+    result.green = json::childNumericValueOr(node, "green", 0);
+    result.blue = json::childNumericValueOr(node, "blue", 0);
 
     return result;
 }
@@ -46,12 +46,16 @@ bool loadTiff(const char *file) {
 Layers::Layers(): _compositionWidth(0), _compositionHeight(0) {
 }
 
-void Layers::addEmptyLayer() {
-    _container.emplace_back();
+void Layers::addEmptyLayer(const LayerBaseProps& props) {
+    _container.emplace_back(props);
 }
 
 void Layers::addLayer(const char *file) {
-    _container.emplace_back(file);
+    LayerBaseProps props;
+    props.fillColor = zeroColor;
+    props.transpColor = transpColor;
+
+    _container.emplace_back(props, file);
 }
 
 const std::string& Layers::name(size_t index) const {
@@ -121,8 +125,9 @@ void Layers::compose() {
                 bool useRotation = layer.getTurnAngle() != 0;
                 auto pix = layer.getRgbQuad(srcX, srcY, useRotation);
 
-                if (transpColor.rgbBlue != pix.rgbBlue || transpColor.rgbGreen != pix.rgbGreen || transpColor.rgbRed != pix.rgbRed)
+                if (transpColor != pix) {
                     _composition[index] = layer.getFillColor();
+                }
             }
         }
     }
@@ -165,9 +170,9 @@ bool Layers::saveProject(const char *file, Cb cb) {
 
         const auto& fillColor = layer.getFillColor();
 
-        fillColorNode->add("red", new json::numberNode(fillColor.rgbRed));
-        fillColorNode->add("green", new json::numberNode(fillColor.rgbGreen));
-        fillColorNode->add("blue", new json::numberNode(fillColor.rgbBlue));
+        fillColorNode->add("red", new json::numberNode(fillColor.red));
+        fillColorNode->add("green", new json::numberNode(fillColor.green));
+        fillColorNode->add("blue", new json::numberNode(fillColor.blue));
     }
 
     const auto content = json::makePretty(root.serialize());
@@ -217,13 +222,16 @@ bool Layers::loadProject(const char *file, Cb cb) {
         if (cb)
             cb(step++, numOfSteps);
 
+        LayerBaseProps props;
         std::string file = json::childStringValueOr(layerNode, "file");
-        int xOffset = json::childNumericValueOr(layerNode, "xOffset", 0);
-        int yOffset = json::childNumericValueOr(layerNode, "yOffset", 0);
-        int turnAngle = json::childNumericValueOr(layerNode, "turnAngle", 0);
-        auto fillColor = readColor(json::childAsHashNodeOrNull(layerNode, "fillColor"));
+        props.x = json::childNumericValueOr(layerNode, "xOffset", 0);
+        props.y = json::childNumericValueOr(layerNode, "yOffset", 0);
+        props.turnAngle = json::childNumericValueOr(layerNode, "turnAngle", 0);
+        props.fillColor = readColor(json::childAsHashNodeOrNull(layerNode, "fillColor"));
+        props.transpColor = readColor(json::childAsHashNodeOrNull(layerNode, "transpColor"));
 
-        _container.emplace_back(file.c_str(), xOffset, yOffset, fillColor, turnAngle);
+        //_container.emplace_back(file.c_str(), xOffset, yOffset, fillColor, turnAngle);
+        _container.emplace_back(props, file);
     }
 
     cb(numOfSteps, numOfSteps);

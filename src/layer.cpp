@@ -3,10 +3,12 @@
 #include <opencv2/geometry/2d.hpp>
 
 #include "layer.hpp"
+#include "win_tools.hpp"
+#include "tools.hpp"
 
 namespace {
 const cv::Vec3b emptyPixel { 0, 0, 0 };
-const RGBQUAD defFill { 127, 127, 127, 0 };
+const AbstractColor defFill { 127, 127, 127, 0 };
 
 int convertToRgba(cv::Mat& img) {
     cv::Mat continuousImg;
@@ -61,7 +63,7 @@ uint8_t *pixelDirect(const cv::Mat& img, int x, int y) {
     return img.data + (y * img.step.p[0] + x * 3);
 }
 
-void populatePixelBuffer(const cv::Mat& img, Layer::PixelBuf& pixelBuffer, int channels = 3) {
+void populatePixelBuffer(const cv::Mat& img, PixelBuf& pixelBuffer, int channels = 3) {
     pixelBuffer.resize(img.cols * img.rows);
 
     memcpy(pixelBuffer.data(), img.data, pixelBuffer.size() * sizeof(RGBQUAD));
@@ -75,15 +77,15 @@ void populatePixelBuffer(const cv::Mat& img, Layer::PixelBuf& pixelBuffer, int c
 
             auto& destPixel = pixelBuffer[index];
 
-            destPixel.rgbRed = line[x*3];
-            destPixel.rgbGreen = line[x*3+1];
-            destPixel.rgbBlue = line[x*3+2];
-            destPixel.rgbReserved = 0;
+            destPixel.red = line[x*3];
+            destPixel.green = line[x*3+1];
+            destPixel.blue = line[x*3+2];
+            destPixel.alpha = 0;
         }
     }
 }
 
-RGBQUAD getRgbQuad(const Layer::PixelBuf& pixelBuffer, int width, int x, int y) {
+const AbstractColor& getRgbQuad(const PixelBuf& pixelBuffer, int width, int x, int y) {
     int index = static_cast<int>(y * width + x);
 
     return pixelBuffer[index];
@@ -106,7 +108,7 @@ void rotate(const cv::Mat& src, cv::Mat& dest, int angle) {
 }
 
 }
-
+/*
 void Layer::initImage(const char *imgFile) {
     _img = cv::imread(imgFile, cv::IMREAD_COLOR);
 
@@ -120,8 +122,8 @@ void Layer::initImage(const char *imgFile) {
     if (_turnAngle != 0)
         applyTurnAngle();
 }
-
-Layer::Layer() {
+*/
+Layer::Layer(): _showRotated(false) {
     static const Color transpColor { 255, 255, 255 };
     static const Color fillColor { 255, 0, 0 };
     static const int width = 100;
@@ -130,6 +132,19 @@ Layer::Layer() {
     _stack.pushBase(transpColor, fillColor, width, height);
 }
 
+Layer::Layer(const LayerBaseProps& props, const std::string& imgFile):
+    _showRotated(false),
+    _fillColor(props.fillColor),
+    _transpColor(props.transpColor),
+    _xOffset(0),
+    _yOffset(0),
+    _turnAngle(0) {
+    _stack.pushBase(props);
+    auto& img = _stack.top().image;
+    int channels = convertToRgbaWithTransparentColor(img, abstractColor2color(_transpColor));
+    populatePixelBuffer(img, pixelBuf(), channels);
+}
+/*
 Layer::Layer(const char *imgFile): Layer(imgFile, 0, 0, defFill, 0) {
 }
 
@@ -137,18 +152,18 @@ Layer::Layer(
     const char *imgFile,
     int xOffset,
     int yOffset,
-    RGBQUAD fillColor,
+    const AbstractColor& fillColor,
     int turnAngle
 ): _imgFile(imgFile), _xOffset(xOffset), _yOffset(yOffset), _fillColor(fillColor), _turnAngle(turnAngle), _showRotated(false) {
     initImage(imgFile);
 }
-
+*/
 Layer::~Layer() {
 }
 
 void Layer::applyTurnAngle() {
-    rotate(_img, _rotatedImg, _turnAngle);
-    populatePixelBuffer(_rotatedImg, _rotatedPixelBuffer);
+    //rotate(_img, _rotatedImg, _turnAngle);
+    //populatePixelBuffer(_rotatedImg, pixelBuf());
 }
 
 void Layer::setTurnAngle(int angle) {
@@ -183,37 +198,36 @@ void Layer::draw(HDC hdc, const PixelBuf& pixelBuf, int x, int y, int width, int
 }
 
 void Layer::draw(HDC hdc, int x, int y) {
-    const auto& img = _showRotated ? _rotatedImg : _img;
-    const auto& pixelBuf = _showRotated ? _rotatedPixelBuffer : _pixelBuffer;
+    const auto& img = image();
 
     if (img.cols == 0 && img.rows == 0)
         return;
 
-    draw(hdc, pixelBuf, _xOffset - x, _yOffset - y, img.cols, img.rows);
+    draw(hdc, pixelBuf(), _xOffset - x, _yOffset - y, img.cols, img.rows);
 }
 
 const cv::Vec3b& Layer::pixel(int x, int y, bool rotated) const {
-    const auto& img = rotated ? _rotatedImg : _img;
-    return ::pixel(img, x, y);
+    return ::pixel(image(), x, y);
 }
 
 const uint8_t *Layer::pixelDirect(int x, int y, bool rotated) const {
-    const auto& img = rotated ? _rotatedImg : _img;
-    return ::pixelDirect(img, x, y);
+    return ::pixelDirect(image(), x, y);
 }
 
-void Layer::setPixel(int x, int y, RGBQUAD clr) {
+void Layer::setPixel(int x, int y, const AbstractColor& clr) {
     int index = static_cast<int>(y * width() + x);
-    _pixelBuffer[index] = clr;
+    pixelBuf()[index] = clr;
 }
 
-void Layer::setSize(int width, int height, RGBQUAD transpClr) {
-    _img.cols = width;
-    _img.rows = height;
+void Layer::setSize(int width, int height, const AbstractColor& transpClr) {
+    image().cols = width;
+    image().rows = height;
 
-    _pixelBuffer.resize(width * height);
+    auto& buf = pixelBuf();
 
-    for (size_t i = 0; i < _pixelBuffer.size(); _pixelBuffer[i++] = transpClr);
+    buf.resize(width * height);
+
+    for (size_t i = 0; i < buf.size(); buf[i++] = transpClr);
 }
 
 void Layer::getOffset(int& xOffset, int& yOffset) const {
@@ -226,9 +240,9 @@ void Layer::setOffset(int xOffset, int yOffset) {
     _yOffset = yOffset;
 }
 
-RGBQUAD Layer::getRgbQuad(int x, int y, bool rotated) {
-    const auto& img = rotated ? _rotatedImg : _img;
-    const auto& buf = rotated ? _rotatedPixelBuffer: _pixelBuffer;
+const AbstractColor& Layer::getRgbQuad(int x, int y, bool rotated) {
+    //const auto& img = rotated ? _rotatedImg : _img;
+    //const auto& buf = rotated ? _rotatedPixelBuffer: _pixelBuffer;
 
-    return ::getRgbQuad(buf, img.cols, x, y);
+    return ::getRgbQuad(pixelBuf(), image().cols, x, y);
 }

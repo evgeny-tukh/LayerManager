@@ -19,3 +19,7 @@ RGBQUAD color2rgbquad(const AbstractColor& color) {
 COLORREF color2colorref(const AbstractColor& color) {
     return RGB(color.red, color.green, color.blue);
 }
+
+Color rgbquad2ocvcolor(const RGBQUAD& color) {
+    return Color(color.rgbBlue, color.rgbGreen, color.rgbRed);
+}
