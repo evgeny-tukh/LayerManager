@@ -17,6 +17,7 @@ ID_MAINMENU MENU
     POPUP "&Edit"
     {
         MENUITEM "&Add layer...", ID_ADD
+        MENUITEM "Add &empty layer...", ID_ADD_EMPTY
         MENUITEM "&Remove layer", ID_REMOVE
         MENUITEM "&Move layer &up", ID_MOVE_UP
         MENUITEM "&Move layer &down", ID_MOVE_DOWN

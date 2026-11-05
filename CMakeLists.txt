@@ -16,6 +16,8 @@ add_executable(
     ${SRC_PATH}/layer_props_wnd.cpp
     ${SRC_PATH}/status_bar.cpp
     ${SRC_PATH}/json_lite.cpp
+    ${SRC_PATH}/image_stack.cpp
+    ${SRC_PATH}/tools.cpp
     ${SRC_PATH}/main.rc
 )
 

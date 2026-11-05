@@ -14,6 +14,7 @@
 #define ID_REMOVE       1006
 #define ID_MOVE_UP      1007
 #define ID_MOVE_DOWN    1008
+#define ID_ADD_EMPTY    1009
 
 #define ID_COMPOSE      1100
 
