@@ -139,7 +139,7 @@ Layer::Layer(const LayerBaseProps& props, const std::string& imgFile):
     _xOffset(0),
     _yOffset(0),
     _turnAngle(0) {
-    _stack.pushBase(props);
+    _stack.pushBase(props, imgFile);
     auto& img = _stack.top().image;
     int channels = convertToRgbaWithTransparentColor(img, abstractColor2color(_transpColor));
     populatePixelBuffer(img, pixelBuf(), channels);
