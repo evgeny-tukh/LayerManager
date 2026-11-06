@@ -74,7 +74,7 @@ void LayerPropsWnd::processCommand(HWND wnd, UINT cmd) {
             break;
         
         case ID_SHOW_ROTATED:
-            setShowRotated();
+            //setShowRotated();
             forceUpdatePreviewWnd();
             break;
     }
@@ -125,7 +125,7 @@ void LayerPropsWnd::showColor() {
 }
 
 void LayerPropsWnd::apply() {
-    if (_selection >= 0) {
+    /*if (_selection >= 0) {
         obtainColorComponents();
 
         AbstractColor fillColor;
@@ -148,7 +148,7 @@ void LayerPropsWnd::apply() {
 
         if (turnAngle != layer.getTurnAngle())
             layer.setTurnAngle(turnAngle);
-    }
+    }*/
 }
 
 void LayerPropsWnd::setLayerIndex(int index) {
@@ -160,26 +160,26 @@ void LayerPropsWnd::setLayerIndex(int index) {
     _green = fillColor.green;
     _blue = fillColor.blue;
 
-    int offsetX;
-    int offsetY;
-    int turnAngle = layer.getTurnAngle();
-    layer.getOffset(offsetX, offsetY);
+    //int offsetX;
+    //int offsetY;
+    //int turnAngle = layer.getTurnAngle();
+    //layer.getOffset(offsetX, offsetY);
 
-    SetDlgItemInt(_wnd, ID_X_OFFSET, offsetX, TRUE);
+    /*SetDlgItemInt(_wnd, ID_X_OFFSET, offsetX, TRUE);
     SetDlgItemInt(_wnd, ID_Y_OFFSET, offsetY, TRUE);
     SetDlgItemInt(_wnd, ID_ANGLE, turnAngle, TRUE);
     SetDlgItemInt(_wnd, ID_RED, _red, FALSE);
     SetDlgItemInt(_wnd, ID_GREEN, _green, FALSE);
-    SetDlgItemInt(_wnd, ID_BLUE, _blue, FALSE);
+    SetDlgItemInt(_wnd, ID_BLUE, _blue, FALSE);*/
 }
-
+/*
 void LayerPropsWnd::setShowRotated() {
     if (_selection < 0)
         return;
 
     _layers[_selection].showRotated(IsDlgButtonChecked(_wnd, ID_SHOW_ROTATED) == BST_CHECKED);
 }
-
+*/
 void LayerPropsWnd::forceUpdatePreviewWnd() {
     InvalidateRect(getSibling(ID_PREVIEW), NULL, TRUE);
 }

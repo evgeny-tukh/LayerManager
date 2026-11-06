@@ -107,7 +107,7 @@ void Layers::findMaxDims() {
 
     _composition.resize(_compositionWidth * _compositionHeight);
 }
-
+/*
 void Layers::compose() {
     findMaxDims();
 
@@ -132,7 +132,7 @@ void Layers::compose() {
         }
     }
 }
-
+*/
 void Layers::erase(size_t index) {
     if (index < _container.size())
         _container.erase(_container.begin() + index);
@@ -146,7 +146,7 @@ void Layers::swapItems(size_t index, int direction) {
 }
 
 bool Layers::saveProject(const char *file, Cb cb) {
-    FILE *project = fopen(file, "w");
+    /*FILE *project = fopen(file, "w");
     
     if (!project)
         return false;
@@ -178,7 +178,7 @@ bool Layers::saveProject(const char *file, Cb cb) {
     const auto content = json::makePretty(root.serialize());
 
     fwrite(content.data(), 1, content.length(), project);
-    fclose(project);
+    fclose(project);*/
 
     return true;
 }

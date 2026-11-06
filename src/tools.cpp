@@ -31,4 +31,13 @@ Image correctColors(Image& image, Color tranparentColor, Color nonTransparentCol
     return bw;
 }
 
+AbstractColor color2abstractcolor(const Color& clr) {
+    AbstractColor result;
 
+    result.alpha = 0;
+    result.blue = clr[0];
+    result.green = clr[1];
+    result.red = clr[2];
+
+    return result;
+}

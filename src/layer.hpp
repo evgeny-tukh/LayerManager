@@ -7,6 +7,7 @@
 #include <Windows.h>
 
 #include "image_stack.hpp"
+#include "tools.hpp"
 
 class Layer {
     public:
@@ -26,7 +27,7 @@ class Layer {
         void draw(HDC hdc, int x, int y);
         static void draw(HDC hdc, const PixelBuf& pixelBuf, int x, int y, int width, int height);
 
-        const std::string& name() const { return _imgFile; }
+        const std::string& name() const { return _stack.top().param.strValue; }
         //const cv::Mat& image() const { return _img; }
         const cv::Vec3b& pixel(int x, int y, bool rotated) const;
         const uint8_t *pixelDirect(int x, int y, bool rotated) const;
@@ -36,24 +37,25 @@ class Layer {
         void setSize(int width, int height, const AbstractColor& transpClr);
         void setPixel(int x, int y, const AbstractColor& clr);
 
-        void getOffset(int& xOffset, int& yOffset) const;
-        void setOffset(int xOffset, int yOffset);
+        //void getOffset(int& xOffset, int& yOffset) const;
+        //void setOffset(int xOffset, int yOffset);
 
-        void setFillColor(const AbstractColor& color) { _fillColor = color; }
-        const AbstractColor& getFillColor() const { return _fillColor; }
+        //void setFillColor(const AbstractColor& color) { _fillColor = color; }
+        const AbstractColor& getFillColor() const { return color2abstractcolor(_stack.top().fill); }
+        const AbstractColor& getTransparentColor() const { return color2abstractcolor(_stack.top().transparent); }
 
         const AbstractColor& getRgbQuad(int x, int y, bool rotated);
 
-        int getTurnAngle() const { return _turnAngle; }
+        //int getTurnAngle() const { return _turnAngle; }
         void setTurnAngle(int angle);
 
         void applyTurnAngle();
 
-        bool showRotated(bool flag) { _showRotated = flag; return flag; }
-        bool showRotated() { return _showRotated; }
+        //bool showRotated(bool flag) { _showRotated = flag; return flag; }
+        //bool showRotated() { return _showRotated; }
 
-        int xOffset() const { return _xOffset; }
-        int yOffset() const { return _yOffset; }
+        //int xOffset() const { return _xOffset; }
+        //int yOffset() const { return _yOffset; }
 
         PixelBuf& pixelBuf() { return _stack.top().pixelBuf; }
         
@@ -61,17 +63,17 @@ class Layer {
         const Image& image() const { return _stack.top().image; }
 
     private:
-        AbstractColor _fillColor;
-        AbstractColor _transpColor;
-        std::string _imgFile;
+        //AbstractColor _fillColor;
+        //AbstractColor _transpColor;
+        //std::string _imgFile;
         //cv::Mat _img;
         //cv::Mat _rotatedImg;
-        int _xOffset;
-        int _yOffset;
-        int _turnAngle;
+        //int _xOffset;
+        //int _yOffset;
+        //int _turnAngle;
         //PixelBuf _pixelBuffer;
         //PixelBuf _rotatedPixelBuffer;
-        bool _showRotated;
+        //bool _showRotated;
         ImageStack _stack;
 
     private:

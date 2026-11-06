@@ -73,9 +73,23 @@ void editColor(HWND wnd, UINT id) {
     }
 }
 
+void getData(HWND wnd) {
+    auto props = getLayerBaseProps(wnd);
+
+    props->width = GetDlgItemInt(wnd, ID_WIDTH, NULL, FALSE);
+    props->height = GetDlgItemInt(wnd, ID_HEIGHT, NULL, FALSE);
+    props->fillColor.red = GetDlgItemInt(wnd, ID_RED, NULL, FALSE);
+    props->fillColor.green = GetDlgItemInt(wnd, ID_GREEN, NULL, FALSE);
+    props->fillColor.blue = GetDlgItemInt(wnd, ID_BLUE, NULL, FALSE);
+    props->transpColor.red = GetDlgItemInt(wnd, ID_RED_TRANSP, NULL, FALSE);
+    props->transpColor.green = GetDlgItemInt(wnd, ID_GREEN_TRANSP, NULL, FALSE);
+    props->transpColor.blue = GetDlgItemInt(wnd, ID_BLUE_TRANSP, NULL, FALSE);
+}
+
 void onCommand(HWND wnd, uint32_t cmd) {
     switch (cmd) {
         case IDOK:
+            getData(wnd);
         case IDCANCEL:
             EndDialog(wnd, cmd);
             break;

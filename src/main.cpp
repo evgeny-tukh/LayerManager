@@ -260,9 +260,9 @@ void addEmptyLayer(HWND wnd) {
     if (editLayerBaseProps(wnd, props)) {
         int count = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETCOUNT, 0, 0)); 
         int item = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_INSERTSTRING, count - 1, reinterpret_cast<WPARAM>("<Empty>")));
-        selectLayerItem(wnd, item);
         layers.addEmptyLayer(props);
         imgWnd->setSelectedLayer(item);
+        selectLayerItem(wnd, item);
         layerPropsWnd->show();
         layerPropsWnd->setLayerIndex(item);
         forceImageRedraw(wnd);

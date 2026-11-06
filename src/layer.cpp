@@ -123,7 +123,7 @@ void Layer::initImage(const char *imgFile) {
         applyTurnAngle();
 }
 */
-Layer::Layer(): _showRotated(false) {
+Layer::Layer()/*: _showRotated(false)*/ {
     static const Color transpColor { 255, 255, 255 };
     static const Color fillColor { 255, 0, 0 };
     static const int width = 100;
@@ -132,16 +132,16 @@ Layer::Layer(): _showRotated(false) {
     _stack.pushBase(transpColor, fillColor, width, height);
 }
 
-Layer::Layer(const LayerBaseProps& props, const std::string& imgFile):
+Layer::Layer(const LayerBaseProps& props, const std::string& imgFile)/*:
     _showRotated(false),
     _fillColor(props.fillColor),
     _transpColor(props.transpColor),
     _xOffset(0),
     _yOffset(0),
-    _turnAngle(0) {
+    _turnAngle(0)*/ {
     _stack.pushBase(props, imgFile);
     auto& img = _stack.top().image;
-    int channels = convertToRgbaWithTransparentColor(img, abstractColor2color(_transpColor));
+    int channels = convertToRgbaWithTransparentColor(img, abstractColor2color(props.transpColor));
     populatePixelBuffer(img, pixelBuf(), channels);
 }
 /*
@@ -167,9 +167,9 @@ void Layer::applyTurnAngle() {
 }
 
 void Layer::setTurnAngle(int angle) {
-    _turnAngle = angle;
+    /*_turnAngle = angle;
 
-    applyTurnAngle();
+    applyTurnAngle();*/
 }
 
 void Layer::draw(HDC hdc, const PixelBuf& pixelBuf, int x, int y, int width, int height) {
@@ -203,7 +203,7 @@ void Layer::draw(HDC hdc, int x, int y) {
     if (img.cols == 0 && img.rows == 0)
         return;
 
-    draw(hdc, pixelBuf(), _xOffset - x, _yOffset - y, img.cols, img.rows);
+    draw(hdc, pixelBuf(), /*_xOffset*/ - x, /*_yOffset*/ - y, img.cols, img.rows);
 }
 
 const cv::Vec3b& Layer::pixel(int x, int y, bool rotated) const {
@@ -229,7 +229,7 @@ void Layer::setSize(int width, int height, const AbstractColor& transpClr) {
 
     for (size_t i = 0; i < buf.size(); buf[i++] = transpClr);
 }
-
+/*
 void Layer::getOffset(int& xOffset, int& yOffset) const {
     xOffset = _xOffset;
     yOffset = _yOffset;
@@ -239,7 +239,7 @@ void Layer::setOffset(int xOffset, int yOffset) {
     _xOffset = xOffset;
     _yOffset = yOffset;
 }
-
+*/
 const AbstractColor& Layer::getRgbQuad(int x, int y, bool rotated) {
     //const auto& img = rotated ? _rotatedImg : _img;
     //const auto& buf = rotated ? _rotatedPixelBuffer: _pixelBuffer;
