@@ -1,7 +1,9 @@
 #include "from_file.hpp"
 
+namespace Op {
+
 LoadFromFile::LoadFromFile(const std::string& file, const AbstractColor& transpColor):
-    GenericOperation(Operation::FromFile, Params(file, { transpColor.red, transpColor.green, transpColor.blue })) {
+    GenericOperation(Op::Code::FromFile, Params(file, { transpColor.red, transpColor.green, transpColor.blue })) {
 }
 
 Stage LoadFromFile::execute(const Stage& source) const {
@@ -22,4 +24,10 @@ const AbstractColor LoadFromFile::transpColor() const {
     result.blue = _params.intValue(2);
 
     return result;
+}
+
+const std::string LoadFromFile::toString() const {
+    return GenericOperation::toString() + fileName();
+}
+
 }

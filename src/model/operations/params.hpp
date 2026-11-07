@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+namespace Op {
+
 class Params {
     public:
         Params() {}
@@ -18,3 +20,5 @@ class Params {
         std::vector<int> _intValues;
         std::string _strValue;
 };
+
+}

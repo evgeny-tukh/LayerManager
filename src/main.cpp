@@ -269,12 +269,18 @@ void forceImageRedraw(HWND wnd) {
     InvalidateRect(GetDlgItem(wnd, ID_PREVIEW), NULL, TRUE);
 }
 
+int addLayerItem(HWND wnd, const LayerBaseProps& props) {
+    int count = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETCOUNT, 0, 0)); 
+    return static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_INSERTSTRING, count - 1, reinterpret_cast<WPARAM>(props.name.c_str())));
+}
+
 void addEmptyLayer(HWND wnd) {
     LayerBaseProps props;
     
     if (editLayerBaseProps(wnd, props)) {
-        int count = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETCOUNT, 0, 0)); 
-        int item = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_INSERTSTRING, count - 1, reinterpret_cast<WPARAM>("<Empty>")));
+        //int count = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETCOUNT, 0, 0)); 
+        //int item = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_INSERTSTRING, count - 1, reinterpret_cast<WPARAM>(props.name)));
+        int item = addLayerItem(wnd, props);
         layers.addEmptyLayer(props);
         imgWnd->setSelectedLayer(item);
         selectLayerItem(wnd, item);
@@ -288,8 +294,11 @@ void addLayer(HWND wnd) {
     auto fileName = getOpenFileName(wnd, layerAddStr, layersFilter);
 
     if (!fileName.empty()) {
-        int count = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETCOUNT, 0, 0)); 
-        int item = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_INSERTSTRING, count - 1, reinterpret_cast<WPARAM>(fileName.c_str())));
+        //int count = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_GETCOUNT, 0, 0)); 
+        //int item = static_cast<int>(SendDlgItemMessageA(wnd, ID_LAYERS, LB_INSERTSTRING, count - 1, reinterpret_cast<WPARAM>(props.name)));
+        LayerBaseProps props;
+        props.name = fileName;
+        int item = addLayerItem(wnd, props);
         selectLayerItem(wnd, item);
         layers.addLayer(fileName.c_str());
         imgWnd->setSelectedLayer(item);

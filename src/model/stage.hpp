@@ -14,5 +14,4 @@ struct Stage {
     Size shift { 0, 0 };
     Image image;
     PixelBuf pixelBuf;
-    std::string name;
 };

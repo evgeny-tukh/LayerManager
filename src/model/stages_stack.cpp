@@ -9,17 +9,17 @@
 namespace {
 
 // Operations that do not need left operand so could be done when the stack is empty
-std::unordered_set<Operation> unaryOperations {
-    Operation::Resize,
-    Operation::SetFillColor,
-    Operation::SetTransparentColor,
-    Operation::FromFile,
+std::unordered_set<Op::Code> unaryOperations {
+    Op::Code::Resize,
+    Op::Code::SetFillColor,
+    Op::Code::SetTransparentColor,
+    Op::Code::FromFile,
 };
 
 /// @brief Checks if the operartion is unary
 /// @param oper operation
 /// @return result flag
-bool isUnary(Operation oper) {
+bool isUnary(Op::Code oper) {
     return unaryOperations.find(oper) != unaryOperations.end();
 }
 /*
@@ -61,7 +61,7 @@ StagesStack::StagesStack() {
 
 Image StagesStack::getLastImage() {
     if (!_container.empty())
-        return _container.back().image.clone();
+        return top().image.clone();
 
     Image img(getDefSize(), CV_8UC3, defFillColor());
 
@@ -125,18 +125,14 @@ void StagesStack::pushBase(Color transparent, Color fill, int width, int height,
 }
 */
 
-void StagesStack::push(GenericOperation& oper) {
-    if (_container.empty())
-        _container.push_back(oper.execute());
-    else
-        _container.push_back(oper.execute(_container.back()));
+void StagesStack::push(Op::GenericOperation& operation) {
+    const auto& stage = _container.empty() ? Stage() : top();
+    _container.push_back(std::pair<std::string, Stage>(operation.toString(), operation.execute(stage)));
 }
 
 void StagesStack::populateItemList(std::vector<std::string>& items) {
     items.clear();
 
-    for (const auto& item: _container) {
-        items.push_back(item.name);
-    }
+    for (const auto& item: _container)
+        items.push_back(item.first);
 }
-

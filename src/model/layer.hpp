@@ -41,10 +41,10 @@ class Layer {
         //void setOffset(int xOffset, int yOffset);
 
         //void setFillColor(const AbstractColor& color) { _fillColor = color; }
-        const AbstractColor& getFillColor() const;
-        const AbstractColor& getTransparentColor() const;
+        const AbstractColor getFillColor() const;
+        const AbstractColor getTransparentColor() const;
 
-        const AbstractColor& getRgbQuad(int x, int y, bool rotated);
+        const AbstractColor getRgbQuad(int x, int y, bool rotated);
 
         //int getTurnAngle() const { return _turnAngle; }
         void setTurnAngle(int angle);
@@ -62,7 +62,7 @@ class Layer {
         Image& image() { return _stack.top().image; }
         const Image& image() const { return _stack.top().image; }
 
-        const std::string& name() const { return _name; }
+        const std::string& name() const { return _props.name; }
 
     private:
         //AbstractColor _fillColor;
@@ -77,7 +77,7 @@ class Layer {
         //PixelBuf _rotatedPixelBuffer;
         //bool _showRotated;
         StagesStack _stack;
-        std::string _name;
+        LayerBaseProps _props;
 
     private:
         //void initImage(const char *image);

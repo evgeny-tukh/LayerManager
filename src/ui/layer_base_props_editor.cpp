@@ -84,6 +84,10 @@ void getData(HWND wnd) {
     props->transpColor.red = GetDlgItemInt(wnd, ID_RED_TRANSP, NULL, FALSE);
     props->transpColor.green = GetDlgItemInt(wnd, ID_GREEN_TRANSP, NULL, FALSE);
     props->transpColor.blue = GetDlgItemInt(wnd, ID_BLUE_TRANSP, NULL, FALSE);
+
+    size_t size = GetWindowTextLengthA(GetDlgItem(wnd, ID_NAME));
+    props->name.resize(size);
+    GetDlgItemTextA(wnd, ID_NAME, props->name.data(), static_cast<int>(size));
 }
 
 void onCommand(HWND wnd, uint32_t cmd) {
@@ -114,6 +118,7 @@ void initDlg(HWND wnd, LPARAM lp) {
     SetDlgItemInt(wnd, ID_RED_TRANSP, props->transpColor.red, FALSE);
     SetDlgItemInt(wnd, ID_GREEN_TRANSP, props->transpColor.green, FALSE);
     SetDlgItemInt(wnd, ID_BLUE_TRANSP, props->transpColor.blue, FALSE);
+    SetDlgItemTextA(wnd, ID_NAME, props->name.c_str());
 }
 
 INT_PTR drawBitmap(HWND wnd, DRAWITEMSTRUCT *drawInfo, const AbstractColor& clr) {

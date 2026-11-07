@@ -8,7 +8,7 @@
 #include <opencv.hpp>
 
 #include "defs.hpp"
-#include "operations/operation.hpp"
+#include "operation.hpp"
 #include "stage.hpp"
 
 class StagesStack {
@@ -19,18 +19,18 @@ class StagesStack {
         void pushBase(const LayerBaseProps& props, const std::string& file = {});
 
         void push(Operation oper, Param param);*/
-        void push(GenericOperation& oper);
+        void push(Op::GenericOperation& oper);
         void pop() { _container.pop_back(); }
 
-        auto& top() { return _container.back(); }
-        const auto& top() const { return _container.back(); }
+        auto& top() { return _container.back().second; }
+        const auto& top() const { return _container.back().second; }
 
         auto size() const { return _container.size(); }
 
         void populateItemList(std::vector<std::string>& items);
 
     private:
-        std::deque<Stage> _container;
+        std::deque<std::pair<std::string, Stage>> _container;
 
     private:
         void resize(int width, int height);

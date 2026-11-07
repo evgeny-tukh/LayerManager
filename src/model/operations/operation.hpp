@@ -7,9 +7,14 @@
 #include "stage.hpp"
 #include "params.hpp"
 
-enum class Operation {
+namespace Op {
+
+enum class Code {
     /// @brief Dummy operation
     NoOper = 0,
+
+    /// @brief Fill a rectangle
+    Rectangle,
 
     /// @brief Resize the image
     Resize,
@@ -36,18 +41,19 @@ enum class Operation {
 class GenericOperation {
     public:
         GenericOperation();
-        GenericOperation(Operation oper);
-        GenericOperation(Operation oper, const Params& params);
+        GenericOperation(Code oper);
+        GenericOperation(Code oper, const Params& params);
 
         virtual const std::string toString() const;
 
-        const Operation oper() const { return _oper; }
+        const Code oper() const { return _oper; }
         const Params& params() const { return _params; }
 
         virtual Stage execute(const Stage& source = Stage()) const { return {}; }
 
     protected:
-        Operation _oper;
+        Code _oper;
         Params _params;
 };
 
+}
