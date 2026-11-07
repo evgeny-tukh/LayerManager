@@ -57,14 +57,7 @@ void Layers::addLayer(const char *file) {
 
     _container.emplace_back(props, file);
 }
-/*
-const std::string& Layers::name(size_t index) const {
-    if (index >= _container.size())
-        return emptyStr;
-        
-    return _container[index].name();
-}
-*/
+
 const cv::Mat& Layers::image(size_t index) const {
     if (index >= _container.size())
         return emptyMatrix;
@@ -107,32 +100,7 @@ void Layers::findMaxDims() {
 
     _composition.resize(_compositionWidth * _compositionHeight);
 }
-/*
-void Layers::compose() {
-    findMaxDims();
 
-    for (int x = 0; x < _compositionWidth; ++x) {
-        for (int y = 0; y < _compositionHeight; ++y) {
-            size_t index = x + y * _compositionWidth;
-                    
-            for (auto& layer: _container) {
-                int srcX = x - layer.xOffset();
-                int srcY = y - layer.yOffset();
-
-                if (srcX < 0 || srcX >= layer.width() || srcY < 0 || srcY >= layer.height())
-                    continue;
-
-                bool useRotation = layer.getTurnAngle() != 0;
-                auto pix = layer.getRgbQuad(srcX, srcY, useRotation);
-
-                if (transpColor != pix) {
-                    _composition[index] = layer.getFillColor();
-                }
-            }
-        }
-    }
-}
-*/
 void Layers::erase(size_t index) {
     if (index < _container.size())
         _container.erase(_container.begin() + index);
@@ -230,7 +198,6 @@ bool Layers::loadProject(const char *file, Cb cb) {
         props.fillColor = readColor(json::childAsHashNodeOrNull(layerNode, "fillColor"));
         props.transpColor = readColor(json::childAsHashNodeOrNull(layerNode, "transpColor"));
 
-        //_container.emplace_back(file.c_str(), xOffset, yOffset, fillColor, turnAngle);
         _container.emplace_back(props, file);
     }
 

@@ -22,40 +22,9 @@ std::unordered_set<Op::Code> unaryOperations {
 bool isUnary(Op::Code oper) {
     return unaryOperations.find(oper) != unaryOperations.end();
 }
-/*
-void formatGenericOpen (const Param&, std::stringstream&) {
-    
+
 }
 
-void formatGenericOpen (const Param& param, std::stringstream& ss) {
-}
-
-std::unordered_map<Operation, void(*)(const Param&, std::stringstream)> paramFormatter {
-    { Operation::NoOper, {} },
-    { Operation::Resize, [](Param param, std::stringstream ss) { ss << param.intValues[0] << '*' << param.intValues[1]; } },
-    { Operation::SetFillColor, [](Param param, std::stringstream ss) { ss << param.intValues[0] << '*' << param.intValues[1]; } },
-    { Operation::SetTransparentColor, "Set Transparent" },
-    { Operation::FromFile, "Load from file" },
-    { Operation::Shift, "Shift" },
-    { Operation::Rotate, "Rotate" },
-    { Operation::Tile, "Tile" },
-};
-*/
-}
-/*
-void StagesStack::push(Operation oper, Param param) {
-    if (_container.empty() && !isUnary(oper))
-        // the container is empty and the operation is not unary
-        // Nothing could be done
-        return;
-
-    switch (oper) {
-        case Operation::Resize:
-            resize(param.intValues[0], param.intValues[1]);
-            break;
-    }
-}
-*/
 StagesStack::StagesStack() {
 }
 
@@ -101,29 +70,6 @@ void StagesStack::shift(int x, int y) {
 void StagesStack::tile(const std::string& file, int x, int y, int width, int height) {
 
 }
-/*
-void StagesStack::pushBase(const LayerBaseProps& props, const std::string& file) {
-    pushBase(abstractColor2color(props.transpColor), abstractColor2color(props.fillColor), props.width, props.height, file);
-}
-
-void StagesStack::pushBase(Color transparent, Color fill, int width, int height, const std::string& file) {
-    Item item;
-
-    item.oper = Operation::NoOper;
-    item.size = Size(height, width);
-    item.transparent = transparent;
-
-    if (file.empty())
-        item.image = Image(height, width, CV_8UC3, fill);
-    else
-        item.image = cv::imread(file, cv::IMREAD_COLOR);
-
-    _container.push(item);
-
-    cv::imshow("Заполненное изображение", item.image);
-    cv::waitKey(0);
-}
-*/
 
 void StagesStack::push(Op::GenericOperation& operation) {
     const auto& stage = _container.empty() ? Stage() : top();

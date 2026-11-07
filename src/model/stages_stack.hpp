@@ -15,10 +15,6 @@ class StagesStack {
     public:
         StagesStack();
 
-        /*void pushBase(Color transparent, Color fill, int width, int height, const std::string& file = {});
-        void pushBase(const LayerBaseProps& props, const std::string& file = {});
-
-        void push(Operation oper, Param param);*/
         void push(Op::GenericOperation& oper);
         void pop() { _container.pop_back(); }
 

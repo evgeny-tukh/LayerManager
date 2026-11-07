@@ -19,7 +19,6 @@ class Layers {
         void addEmptyLayer(const LayerBaseProps& props);
         void addLayer(const char *file);
 
-        //const std::string& name(size_t index) const;
         const cv::Mat& image(size_t index) const;
         void getPixel(size_t index, int x, int y, cv::Vec3b& result) const;
         const size_t width(size_t index) const;
@@ -32,7 +31,6 @@ class Layers {
 
         Layer& operator[](size_t index) { return _container[index]; }
 
-        //void compose();
         void compose2(Cb cb = {});
 
         bool loadProject(const char *file, Cb cb = {});

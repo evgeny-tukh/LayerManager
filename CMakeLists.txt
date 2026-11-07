@@ -31,7 +31,6 @@ set (
     UI_FILES
     ${UI_PATH}/img_wnd.cpp
     ${UI_PATH}/generic_wnd.cpp
-    ${UI_PATH}/layer_props_wnd.cpp
     ${UI_PATH}/status_bar.cpp
     ${UI_PATH}/win_tools.cpp
     ${UI_PATH}/layer_base_props_editor.cpp
