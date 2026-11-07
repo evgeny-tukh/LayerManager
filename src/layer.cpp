@@ -9,7 +9,7 @@
 namespace {
 const cv::Vec3b emptyPixel { 0, 0, 0 };
 const AbstractColor defFill { 127, 127, 127, 0 };
-
+/*
 int convertToRgba(cv::Mat& img) {
     cv::Mat continuousImg;
     if (!img.isContinuous()) {
@@ -106,7 +106,7 @@ void rotate(const cv::Mat& src, cv::Mat& dest, int angle) {
     cv::warpAffine(src, dest, rotationMatrix, src.size());
     cv::imwrite("debug_result.png", dest);
 }
-
+*/
 }
 /*
 void Layer::initImage(const char *imgFile) {
@@ -123,23 +123,25 @@ void Layer::initImage(const char *imgFile) {
         applyTurnAngle();
 }
 */
-Layer::Layer()/*: _showRotated(false)*/ {
+Layer::Layer(): _name(std::to_string(time(nullptr)))/*: _showRotated(false)*/ {
     static const Color transpColor { 255, 255, 255 };
     static const Color fillColor { 255, 0, 0 };
     static const int width = 100;
     static const int height = 100;
-    
-    _stack.pushBase(transpColor, fillColor, width, height);
+    //TBD
+    //_stack.pushBase(transpColor, fillColor, width, height);
 }
 
-Layer::Layer(const LayerBaseProps& props, const std::string& imgFile)/*:
+Layer::Layer(const LayerBaseProps& props, const std::string& imgFile):
+    _name(props.name)/*,
     _showRotated(false),
     _fillColor(props.fillColor),
     _transpColor(props.transpColor),
     _xOffset(0),
     _yOffset(0),
     _turnAngle(0)*/ {
-    _stack.pushBase(props, imgFile);
+    //TBD
+    //_stack.pushBase(props, imgFile);
     auto& img = _stack.top().image;
     int channels = convertToRgbaWithTransparentColor(img, abstractColor2color(props.transpColor));
     populatePixelBuffer(img, pixelBuf(), channels);
@@ -245,4 +247,12 @@ const AbstractColor& Layer::getRgbQuad(int x, int y, bool rotated) {
     //const auto& buf = rotated ? _rotatedPixelBuffer: _pixelBuffer;
 
     return ::getRgbQuad(pixelBuf(), image().cols, x, y);
+}
+
+const AbstractColor& Layer::getFillColor() const {
+    return color2abstractcolor(_stack.top().fill);
+}
+
+const AbstractColor& Layer::getTransparentColor() const {
+    return color2abstractcolor(_stack.top().transparent);
 }

@@ -57,14 +57,14 @@ void Layers::addLayer(const char *file) {
 
     _container.emplace_back(props, file);
 }
-
+/*
 const std::string& Layers::name(size_t index) const {
     if (index >= _container.size())
         return emptyStr;
         
     return _container[index].name();
 }
-
+*/
 const cv::Mat& Layers::image(size_t index) const {
     if (index >= _container.size())
         return emptyMatrix;

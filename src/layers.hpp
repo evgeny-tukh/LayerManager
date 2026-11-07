@@ -19,7 +19,7 @@ class Layers {
         void addEmptyLayer(const LayerBaseProps& props);
         void addLayer(const char *file);
 
-        const std::string& name(size_t index) const;
+        //const std::string& name(size_t index) const;
         const cv::Mat& image(size_t index) const;
         void getPixel(size_t index, int x, int y, cv::Vec3b& result) const;
         const size_t width(size_t index) const;

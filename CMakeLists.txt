@@ -2,13 +2,17 @@ cmake_minimum_required(VERSION 3.29)
 project(LayerMgr)
 
 set(SRC_PATH ${PROJECT_SOURCE_DIR}/src)
+set(OPER_PATH ${SRC_PATH}/operations)
 set(BIN_PATH ${PROJECT_SOURCE_DIR}/build/bin)
 
 message("OCSV dir ${OCSV_DIR}")
 
 add_executable(
     layerMgr
-    ${SRC_PATH}/main.cpp
+    ${SRC_PATH}/stage.cpp
+    ${OPER_PATH}/operation.cpp
+    ${OPER_PATH}/params.cpp
+    ${OPER_PATH}/from_file.cpp
     ${SRC_PATH}/layers.cpp
     ${SRC_PATH}/layer.cpp
     ${SRC_PATH}/img_wnd.cpp
@@ -16,10 +20,11 @@ add_executable(
     ${SRC_PATH}/layer_props_wnd.cpp
     ${SRC_PATH}/status_bar.cpp
     ${SRC_PATH}/json_lite.cpp
-    ${SRC_PATH}/image_stack.cpp
     ${SRC_PATH}/tools.cpp
     ${SRC_PATH}/win_tools.cpp
     ${SRC_PATH}/layer_base_props_editor.cpp
+    ${SRC_PATH}/stages_stack.cpp
+    ${SRC_PATH}/main.cpp
     ${SRC_PATH}/main.rc
 )
 
@@ -27,6 +32,8 @@ message(${OCSV_DIR})
 target_include_directories(
     layerMgr
     PRIVATE
+    ${SRC_PATH}
+    ${OPER_PATH}
     ${OCSV_DIR}/build/include
     ${OCSV_DIR}/build/include/opencv2
 )

@@ -36,6 +36,8 @@
 #define ID_GREEN_TRANSP         1116
 #define ID_BLUE_TRANSP          1117
 #define ID_TRANSP_COLOR_BOX     1118
+#define ID_OPERATIONS           1119
+#define ID_NAME                 1120
 
 #define ID_LAYERS               2000
 #define ID_PREVIEW              2001

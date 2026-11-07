@@ -2,12 +2,15 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 #include <opencv.hpp>
 
 using Color = cv::Scalar;
 using Image = cv::Mat;
 using Size = cv::Size;
+
+std::string createDefLayerName();
 
 #pragma pack(1)
 struct AbstractColor {
@@ -36,10 +39,13 @@ struct LayerBaseProps {
     int turnAngle = 0;
     AbstractColor transpColor = { 255, 255, 255, 0 };
     AbstractColor fillColor = { 128, 128, 128, 0 };
+    std::string name = createDefLayerName();
 };
 
 inline Color defTransparentColor() { return { 255, 255, 255 }; }
+inline AbstractColor defTransparentColorA() { return { 255, 255, 255, 0 }; }
 inline Color defFillColor() { return { 128, 128, 128 }; }
 inline Size getDefSize() { return { 0, 0 }; }
 inline Size getZeroShift() { return { 0, 0 }; }
+
 

@@ -32,7 +32,7 @@ const int layerPropsHeight = 230;
 Layers layers;
 
 std::shared_ptr<ImgWnd> imgWnd;
-std::shared_ptr<LayerPropsWnd> layerPropsWnd;
+//std::shared_ptr<LayerPropsWnd> layerPropsWnd;
 std::shared_ptr<StatusBar> statusBar;
 
 using FilterItem = std::pair<std::string, std::string>;
@@ -102,7 +102,8 @@ void onResize(HWND wnd, unsigned width, unsigned height) {
 
     MoveWindow(GetDlgItem(wnd, ID_LAYERS), 0, 0, layerListWidth, height - layerPropsHeight, true);
     MoveWindow(GetDlgItem(wnd, ID_PREVIEW), layerListWidth, 0, width - layerListWidth, height, true);
-    MoveWindow(GetDlgItem(wnd, ID_LAYER_PROPS), 0, height - layerPropsHeight, layerListWidth, layerPropsHeight, true);
+    //MoveWindow(GetDlgItem(wnd, ID_LAYER_PROPS), 0, height - layerPropsHeight, layerListWidth, layerPropsHeight, true);
+    MoveWindow(GetDlgItem(wnd, ID_OPERATIONS), 0, height - layerPropsHeight, layerListWidth, layerPropsHeight, true);
 
     statusBar->reposition(width, height);
 }
@@ -136,8 +137,22 @@ void initWindow(HWND wnd) {
     imgWnd = std::make_shared<ImgWnd>(instance, layers);
     imgWnd->create(wnd, ID_PREVIEW, layerListWidth, 0, client.right - layerListWidth, client.bottom, true, WS_HSCROLL|WS_VSCROLL);
 
-    layerPropsWnd = std::make_shared<LayerPropsWnd>(instance, layers);
-    layerPropsWnd->create(wnd, ID_LAYER_PROPS, 0, client.bottom - layerPropsHeight, layerListWidth, layerPropsHeight, false);
+    CreateWindowA(
+        "LISTBOX",
+        "",
+        WS_VISIBLE|WS_CHILD|WS_BORDER|LBS_NOINTEGRALHEIGHT|LBS_NOTIFY,
+        0,
+        client.bottom - layerPropsHeight,
+        layerListWidth,
+        layerPropsHeight,
+        wnd,
+        reinterpret_cast<HMENU>(ID_OPERATIONS),
+        instance,
+        nullptr
+    );
+
+    //layerPropsWnd = std::make_shared<LayerPropsWnd>(instance, layers);
+    //layerPropsWnd->create(wnd, ID_LAYER_PROPS, 0, client.bottom - layerPropsHeight, layerListWidth, layerPropsHeight, false);
 
     statusBar = std::make_shared<StatusBar>(instance);
     statusBar->create(wnd, ID_STATUS);
@@ -263,8 +278,8 @@ void addEmptyLayer(HWND wnd) {
         layers.addEmptyLayer(props);
         imgWnd->setSelectedLayer(item);
         selectLayerItem(wnd, item);
-        layerPropsWnd->show();
-        layerPropsWnd->setLayerIndex(item);
+        //layerPropsWnd->show();
+        //layerPropsWnd->setLayerIndex(item);
         forceImageRedraw(wnd);
     }
 }
@@ -278,8 +293,8 @@ void addLayer(HWND wnd) {
         selectLayerItem(wnd, item);
         layers.addLayer(fileName.c_str());
         imgWnd->setSelectedLayer(item);
-        layerPropsWnd->show();
-        layerPropsWnd->setLayerIndex(item);
+        //layerPropsWnd->show();
+        //layerPropsWnd->setLayerIndex(item);
         forceImageRedraw(wnd);
     }
 }
@@ -330,13 +345,13 @@ void onSelectLayer(HWND wnd) {
     int numOfLayers = getNumOfLayers(wnd);
 
     if (selection == numOfLayers) {
-        layerPropsWnd->hide();
+        //layerPropsWnd->hide();
         imgWnd->setSelectedLayer(ImgWnd::Constants::COMPOSITION);
         forceImageRedraw(wnd);
     } else if (selection >= 0 && selection < numOfLayers) {
         imgWnd->setSelectedLayer(selection);
-        layerPropsWnd->show();
-        layerPropsWnd->setLayerIndex(selection);
+        //layerPropsWnd->show();
+        //layerPropsWnd->setLayerIndex(selection);
         forceImageRedraw(wnd);
     }
 }
@@ -346,7 +361,7 @@ void compose(HWND wnd) {
 
     layers.compose2([&wnd](size_t step, size_t steps) { updateStep(wnd, step, steps); });
     imgWnd->setSelectedLayer(ImgWnd::COMPOSITION);
-    layerPropsWnd->hide();
+    //layerPropsWnd->hide();
     forceImageRedraw(wnd);
 
     statusBar->setText(0, "");

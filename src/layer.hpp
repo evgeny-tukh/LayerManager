@@ -6,7 +6,7 @@
 #include <opencv.hpp>
 #include <Windows.h>
 
-#include "image_stack.hpp"
+#include "stages_stack.hpp"
 #include "tools.hpp"
 
 class Layer {
@@ -27,7 +27,7 @@ class Layer {
         void draw(HDC hdc, int x, int y);
         static void draw(HDC hdc, const PixelBuf& pixelBuf, int x, int y, int width, int height);
 
-        const std::string& name() const { return _stack.top().param.strValue; }
+        //const std::string& name() const { return _stack.top().params.strValue; }
         //const cv::Mat& image() const { return _img; }
         const cv::Vec3b& pixel(int x, int y, bool rotated) const;
         const uint8_t *pixelDirect(int x, int y, bool rotated) const;
@@ -41,8 +41,8 @@ class Layer {
         //void setOffset(int xOffset, int yOffset);
 
         //void setFillColor(const AbstractColor& color) { _fillColor = color; }
-        const AbstractColor& getFillColor() const { return color2abstractcolor(_stack.top().fill); }
-        const AbstractColor& getTransparentColor() const { return color2abstractcolor(_stack.top().transparent); }
+        const AbstractColor& getFillColor() const;
+        const AbstractColor& getTransparentColor() const;
 
         const AbstractColor& getRgbQuad(int x, int y, bool rotated);
 
@@ -62,6 +62,8 @@ class Layer {
         Image& image() { return _stack.top().image; }
         const Image& image() const { return _stack.top().image; }
 
+        const std::string& name() const { return _name; }
+
     private:
         //AbstractColor _fillColor;
         //AbstractColor _transpColor;
@@ -74,7 +76,8 @@ class Layer {
         //PixelBuf _pixelBuffer;
         //PixelBuf _rotatedPixelBuffer;
         //bool _showRotated;
-        ImageStack _stack;
+        StagesStack _stack;
+        std::string _name;
 
     private:
         //void initImage(const char *image);
